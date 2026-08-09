@@ -1,4 +1,4 @@
-name: Build iOS
+name: Build iOS IPA
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 jobs:
   build-ios:
     runs-on: macos-latest
-    name: Build iOS (net9.0-ios)
+    name: Build iOS IPA (unsigned - sign with 3uTools)
 
     steps:
       - name: Checkout code
@@ -21,29 +21,49 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Install MAUI iOS workload
+      - name: Select latest Xcode
         run: |
-          dotnet workload install maui-ios
-          dotnet workload install ios
+          # Liệt kê Xcode versions có trên runner
+          ls /Applications/ | grep Xcode
+          # Chọn version mới nhất tương thích
+          XCODE=$(ls /Applications/ | grep "^Xcode" | sort -V | tail -1)
+          echo "Using: $XCODE"
+          sudo xcode-select -s "/Applications/$XCODE/Contents/Developer"
+          xcodebuild -version
 
-      - name: Restore NuGet packages (iOS only)
+      - name: Install & update MAUI iOS workload
+        run: |
+          dotnet workload install maui-ios ios
+          dotnet workload update
+
+      - name: Restore (iOS only)
         run: dotnet restore POSPrinter.csproj /p:TargetFrameworks=net9.0-ios
 
-      - name: Build iOS (no code signing)
+      - name: Build iOS .app (unsigned)
         run: |
           dotnet build POSPrinter.csproj \
             -f net9.0-ios \
             -c Release \
             /p:TargetFrameworks=net9.0-ios \
-            /p:RuntimeIdentifier=iossimulator-x64 \
+            /p:RuntimeIdentifier=ios-arm64 \
             /p:CodesignKey="" \
             /p:CodesignProvision="" \
             /p:EnableCodeSigning=false \
-            /p:ArchiveOnBuild=false
+            /p:ArchiveOnBuild=false \
+            /p:_RequireCodeSigning=false
 
-      - name: Upload build artifacts
+      - name: Package .app → IPA
+        run: |
+          APP_PATH=$(find bin/Release/net9.0-ios -name "*.app" | head -1)
+          echo "Found app: $APP_PATH"
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/
+          zip -r POSPrinter.ipa Payload/
+          echo "IPA created: $(ls -lh POSPrinter.ipa)"
+
+      - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ios-build
-          path: bin/Release/net9.0-ios/
-          if-no-files-found: warn
+          name: POSPrinter-iOS-unsigned
+          path: POSPrinter.ipa
+          if-no-files-found: error
