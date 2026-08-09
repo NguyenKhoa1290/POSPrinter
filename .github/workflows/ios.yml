@@ -27,13 +27,14 @@ jobs:
           dotnet workload install ios
 
       - name: Restore NuGet packages (iOS only)
-        run: dotnet restore POSPrinter.csproj -p:TargetFramework=net9.0-ios
+        run: dotnet restore POSPrinter.csproj /p:TargetFrameworks=net9.0-ios
 
       - name: Build iOS (no code signing)
         run: |
           dotnet build POSPrinter.csproj \
             -f net9.0-ios \
             -c Release \
+            /p:TargetFrameworks=net9.0-ios \
             /p:RuntimeIdentifier=ios-arm64 \
             /p:CodesignKey="" \
             /p:CodesignProvision="" \
