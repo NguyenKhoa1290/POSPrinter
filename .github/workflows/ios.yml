@@ -22,9 +22,7 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Install MAUI workloads
-        run: |
-          dotnet workload install maui-ios
-          dotnet workload install ios
+        run: dotnet workload restore POSPrinter.csproj
 
       - name: Restore NuGet packages
         run: dotnet restore POSPrinter.csproj
