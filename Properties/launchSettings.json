@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "POSPrinter (Package)": {
+      "commandName": "MsixPackage",
+      "nativeDebugging": false
+    }
+  }
+}

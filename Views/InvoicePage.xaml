@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="POSPrinter.Views.InvoicePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:POSPrinter.ViewModels"
+    xmlns:model="clr-namespace:POSPrinter.Models"
+    xmlns:converters="clr-namespace:POSPrinter.Converters"
+    Title="POS Printer"
+    BackgroundColor="#0F0F1A"
+    Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:MoneyConverter         x:Key="MoneyConverter" />
+            <converters:BoolToScanTextConverter x:Key="ScanTextConverter" />
+            <converters:InverseBoolConverter    x:Key="InverseBool" />
+            <converters:StringToColorConverter  x:Key="StringToColor" />
+            <converters:NullToBoolConverter     x:Key="NullToBool" />
+
+            <!-- Color tokens -->
+            <Color x:Key="BgPage">#0F0F1A</Color>
+            <Color x:Key="BgCard">#1A1A2E</Color>
+            <Color x:Key="BgInput">#16213E</Color>
+            <Color x:Key="BgInputAlt">#0D1527</Color>
+            <Color x:Key="Primary">#7C4DFF</Color>
+            <Color x:Key="Accent">#00E5FF</Color>
+            <Color x:Key="Success">#00E676</Color>
+            <Color x:Key="Danger">#FF5252</Color>
+            <Color x:Key="TextMain">#FFFFFF</Color>
+            <Color x:Key="TextSub">#8888AA</Color>
+            <Color x:Key="BorderNorm">#252540</Color>
+
+            <!-- Styles -->
+            <Style x:Key="SectionLabel" TargetType="Label">
+                <Setter Property="TextColor"       Value="{StaticResource Accent}" />
+                <Setter Property="FontSize"         Value="10" />
+                <Setter Property="FontAttributes"   Value="Bold" />
+                <Setter Property="CharacterSpacing" Value="2" />
+                <Setter Property="Margin"           Value="0,0,0,10" />
+            </Style>
+
+            <Style x:Key="Card" TargetType="Border">
+                <Setter Property="BackgroundColor" Value="{StaticResource BgCard}" />
+                <Setter Property="Stroke"          Value="{StaticResource BorderNorm}" />
+                <Setter Property="StrokeThickness" Value="1" />
+                <Setter Property="StrokeShape"     Value="RoundRectangle 16" />
+                <Setter Property="Padding"         Value="16" />
+                <Setter Property="Margin"          Value="0,0,0,12" />
+            </Style>
+
+            <Style x:Key="InputWrap" TargetType="Border">
+                <Setter Property="BackgroundColor" Value="{StaticResource BgInput}" />
+                <Setter Property="StrokeThickness" Value="1" />
+                <Setter Property="Stroke"          Value="{StaticResource BorderNorm}" />
+                <Setter Property="StrokeShape"     Value="RoundRectangle 10" />
+                <Setter Property="Padding"         Value="12,0" />
+            </Style>
+
+            <Style x:Key="EntryBase" TargetType="Entry">
+                <Setter Property="TextColor"        Value="{StaticResource TextMain}" />
+                <Setter Property="PlaceholderColor" Value="{StaticResource TextSub}" />
+                <Setter Property="BackgroundColor"  Value="Transparent" />
+                <Setter Property="FontSize"         Value="14" />
+                <Setter Property="HeightRequest"    Value="44" />
+            </Style>
+
+            <Style x:Key="BtnPrimary" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                <Setter Property="TextColor"       Value="White" />
+                <Setter Property="FontAttributes"  Value="Bold" />
+                <Setter Property="CornerRadius"    Value="12" />
+                <Setter Property="HeightRequest"   Value="48" />
+                <Setter Property="FontSize"        Value="14" />
+            </Style>
+
+            <Style x:Key="BtnOutline" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="TextColor"       Value="{StaticResource Accent}" />
+                <Setter Property="BorderColor"     Value="{StaticResource Accent}" />
+                <Setter Property="BorderWidth"     Value="1.5" />
+                <Setter Property="FontAttributes"  Value="Bold" />
+                <Setter Property="CornerRadius"    Value="10" />
+                <Setter Property="HeightRequest"   Value="44" />
+                <Setter Property="FontSize"        Value="13" />
+            </Style>
+
+            <Style x:Key="BtnDanger" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="TextColor"       Value="{StaticResource Danger}" />
+                <Setter Property="BorderColor"     Value="{StaticResource Danger}" />
+                <Setter Property="BorderWidth"     Value="1" />
+                <Setter Property="CornerRadius"    Value="8" />
+                <Setter Property="HeightRequest"   Value="36" />
+                <Setter Property="FontSize"        Value="12" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- ─── HEADER ─────────────────────────────────────────────── -->
+        <Border Grid.Row="0"
+                BackgroundColor="{StaticResource BgCard}"
+                StrokeThickness="0"
+                Padding="20,48,20,16">
+            <Border.Shadow>
+                <Shadow Brush="#000000" Opacity="0.5" Offset="0,4" Radius="16" />
+            </Border.Shadow>
+            <Grid ColumnDefinitions="*,Auto">
+                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                    <Label Text="🧾 POS PRINTER"
+                           TextColor="{StaticResource TextMain}"
+                           FontSize="22" FontAttributes="Bold" />
+                    <Label Text="Máy in nhiệt Bluetooth 58mm"
+                           TextColor="{StaticResource TextSub}" FontSize="12" />
+                </VerticalStackLayout>
+                <Border Grid.Column="1"
+                        BackgroundColor="{StaticResource BgInput}"
+                        Stroke="{Binding ConnectionStatusColor, Converter={StaticResource StringToColor}}"
+                        StrokeThickness="1.5" StrokeShape="RoundRectangle 20"
+                        Padding="10,6" VerticalOptions="Center">
+                    <Label Text="{Binding ConnectionStatusText}"
+                           TextColor="{Binding ConnectionStatusColor, Converter={StaticResource StringToColor}}"
+                           FontSize="11" FontAttributes="Bold" />
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- ─── SCROLL ──────────────────────────────────────────────── -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,14" Spacing="0">
+
+                <!-- ══ 1. BLUETOOTH ══════════════════════════════════ -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="10">
+
+                        <!-- Header có nút thu gọn -->
+                        <Grid ColumnDefinitions="*,36" ColumnSpacing="8">
+                            <Label Grid.Column="0"
+                                   Text="BLUETOOTH"
+                                   Style="{StaticResource SectionLabel}"
+                                   Margin="0" VerticalOptions="Center" />
+                            <Border Grid.Column="1"
+                                    BackgroundColor="{StaticResource BgInput}"
+                                    StrokeThickness="1" Stroke="{StaticResource BorderNorm}"
+                                    StrokeShape="RoundRectangle 8"
+                                    HeightRequest="32" WidthRequest="36">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleBtPanelCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="{Binding BtArrow}"
+                                       TextColor="{StaticResource Accent}"
+                                       FontSize="14" FontAttributes="Bold"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center" />
+                            </Border>
+                        </Grid>
+
+                        <!-- Nội dung có thể thu gọn -->
+                        <VerticalStackLayout IsVisible="{Binding IsBtExpanded}" Spacing="10">
+    
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <Button Grid.Column="0"
+                                        Text="{Binding IsScanning, Converter={StaticResource ScanTextConverter}}"
+                                        Command="{Binding StartScanCommand}"
+                                        Style="{StaticResource BtnOutline}"
+                                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}" />
+                                <Button Grid.Column="1" Text="Dừng"
+                                        Command="{Binding StopScanCommand}"
+                                        IsVisible="{Binding IsScanning}"
+                                        Style="{StaticResource BtnDanger}" WidthRequest="64" />
+                            </Grid>
+    
+                            <ActivityIndicator IsVisible="{Binding IsScanning}"
+                                               IsRunning="{Binding IsScanning}"
+                                               Color="{StaticResource Accent}" HeightRequest="24" />
+    
+                            <CollectionView ItemsSource="{Binding DiscoveredDevices}"
+                                            SelectionMode="Single"
+                                            SelectedItem="{Binding SelectedDevice}"
+                                            HeightRequest="120">
+                                <CollectionView.EmptyView>
+                                    <Label Text="Nhấn 'Quét' để tìm máy in..."
+                                           TextColor="{StaticResource TextSub}"
+                                           FontSize="12" HorizontalTextAlignment="Center"
+                                           Margin="0,16" />
+                                </CollectionView.EmptyView>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="model:BluetoothDevice">
+                                        <Grid Padding="6,8" ColumnDefinitions="30,*,20">
+                                            <Label Grid.Column="0" Text="🖨" FontSize="16" VerticalOptions="Center" />
+                                            <VerticalStackLayout Grid.Column="1" Margin="8,0" VerticalOptions="Center">
+                                                <Label Text="{Binding Name}"
+                                                       TextColor="{StaticResource TextMain}"
+                                                       FontSize="13" FontAttributes="Bold" />
+                                                <Label Text="{Binding Address}"
+                                                       TextColor="{StaticResource TextSub}" FontSize="10" />
+                                            </VerticalStackLayout>
+                                            <Label Grid.Column="2" Text="●"
+                                                   TextColor="{StaticResource Success}" FontSize="12"
+                                                   VerticalOptions="Center" IsVisible="{Binding IsConnected}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+    
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="8"
+                                  IsVisible="{Binding SelectedDevice, Converter={StaticResource NullToBool}}">
+                                <Button Grid.Column="0" Text="🔗 Kết nối"
+                                        Command="{Binding ConnectCommand}"
+                                        Style="{StaticResource BtnPrimary}"
+                                        IsEnabled="{Binding IsConnected, Converter={StaticResource InverseBool}}" />
+                                <Button Grid.Column="1" Text="✕ Ngắt"
+                                        Command="{Binding DisconnectCommand}"
+                                        Style="{StaticResource BtnDanger}" HeightRequest="48"
+                                        IsEnabled="{Binding IsConnected}" />
+                            </Grid>
+    
+                            <Border BackgroundColor="{StaticResource BgInput}"
+                                    StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="10,6">
+                                <Label Text="{Binding StatusMessage}"
+                                       TextColor="{StaticResource TextSub}"
+                                       FontSize="12" HorizontalTextAlignment="Center" />
+                            </Border>
+                        </VerticalStackLayout><!-- /IsBtExpanded -->
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ══ 2. THÔNG TIN CỬA HÀNG ════════════════════════ -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="10">
+
+                        <!-- Header có nút thu gọn -->
+                        <Grid ColumnDefinitions="*,36" ColumnSpacing="8">
+                            <Label Grid.Column="0"
+                                   Text="THÔNG TIN CỬA HÀNG"
+                                   Style="{StaticResource SectionLabel}"
+                                   Margin="0" VerticalOptions="Center" />
+                            <Border Grid.Column="1"
+                                    BackgroundColor="{StaticResource BgInput}"
+                                    StrokeThickness="1" Stroke="{StaticResource BorderNorm}"
+                                    StrokeShape="RoundRectangle 8"
+                                    HeightRequest="32" WidthRequest="36">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleStoreInfoPanelCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="{Binding StoreInfoArrow}"
+                                       TextColor="{StaticResource Accent}"
+                                       FontSize="14" FontAttributes="Bold"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center" />
+                            </Border>
+                        </Grid>
+
+                        <!-- Nội dung có thể thu gọn -->
+                        <VerticalStackLayout IsVisible="{Binding IsStoreInfoExpanded}" Spacing="10">
+                            <Border Style="{StaticResource InputWrap}">
+                                <Entry Placeholder="Tên cửa hàng" Text="{Binding StoreName}"
+                                       Style="{StaticResource EntryBase}" />
+                            </Border>
+                            <Border Style="{StaticResource InputWrap}">
+                                <Entry Placeholder="Địa chỉ" Text="{Binding StoreAddress}"
+                                       Style="{StaticResource EntryBase}" />
+                            </Border>
+
+                            <!-- Chọn encoding tiếng Việt -->
+                            <Label Text="ENCODING MÁY IN" Style="{StaticResource SectionLabel}"
+                                   Margin="0,6,0,4" />
+                            <Border BackgroundColor="{StaticResource BgInput}"
+                                    StrokeThickness="1" Stroke="{StaticResource BorderNorm}"
+                                    StrokeShape="RoundRectangle 10" Padding="12,4">
+                                <Picker Title="Chọn kiểu mã hóa chữ..."
+                                        SelectedItem="{Binding SelectedEncodingName}"
+                                        ItemsSource="{Binding EncodingOptions}"
+                                        TextColor="{StaticResource TextMain}"
+                                        TitleColor="{StaticResource TextSub}"
+                                        BackgroundColor="Transparent"
+                                        FontSize="13" />
+                            </Border>
+                            <Label Text="💡 Nếu chữ in sai, thử đổi encoding rồi in lại"
+                                   TextColor="{StaticResource TextSub}" FontSize="10" />
+                        </VerticalStackLayout><!-- /IsStoreInfoExpanded -->
+
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ══ 3. NỘI DUNG HÓA ĐƠN — 2 CỘT SOẠN THẢO ══════ -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="NỘI DUNG HÓA ĐƠN" Style="{StaticResource SectionLabel}" />
+
+                        <!-- Hướng dẫn -->
+                        <Border BackgroundColor="#0D1B2A"
+                                StrokeThickness="1" Stroke="#1E3A5F"
+                                StrokeShape="RoundRectangle 8" Padding="12,8">
+                            <Label FontSize="11" TextColor="#7099BB" LineBreakMode="WordWrap">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="💡 " />
+                                        <Span Text="Trái" FontAttributes="Bold" TextColor="#90C0FF" />
+                                        <Span Text=": nhập tên / paste từ Zalo (Enter = xuống dòng).  " />
+                                        <Span Text="Phải" FontAttributes="Bold" TextColor="#90C0FF" />
+                                        <Span Text=": nhập giá mỗi dòng (số → cộng tiền, chữ → bỏ qua)." />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </Border>
+
+                        <!-- Header cột -->
+                        <Grid ColumnDefinitions="*,130" ColumnSpacing="6">
+                            <Label Grid.Column="0" Text="TÊN SẢN PHẨM"
+                                   TextColor="{StaticResource TextSub}"
+                                   FontSize="10" FontAttributes="Bold" CharacterSpacing="1" />
+                            <Label Grid.Column="1" Text="GIÁ TIỀN"
+                                   TextColor="{StaticResource TextSub}"
+                                   FontSize="10" FontAttributes="Bold" CharacterSpacing="1"
+                                   HorizontalOptions="End" HorizontalTextAlignment="End" />
+                        </Grid>
+
+                        <!-- 2 Editor cạnh nhau -->
+                        <Grid ColumnDefinitions="*,130" ColumnSpacing="6" MinimumHeightRequest="220">
+
+                            <!-- Cột trái: Tên sản phẩm (free text) -->
+                            <Border Grid.Column="0"
+                                    BackgroundColor="{StaticResource BgInput}"
+                                    StrokeThickness="1.5"
+                                    Stroke="{StaticResource BorderNorm}"
+                                    StrokeShape="RoundRectangle 12"
+                                    Padding="10,6">
+                                <Editor
+                                    Text="{Binding ItemsText, Mode=TwoWay}"
+                                    Placeholder="Nhập danh sách sản phẩm&#x0a;hoặc dán từ Zalo..."
+                                    PlaceholderColor="{StaticResource TextSub}"
+                                    TextColor="{StaticResource TextMain}"
+                                    BackgroundColor="Transparent"
+                                    FontSize="14"
+                                    AutoSize="TextChanges"
+                                    MinimumHeightRequest="200" />
+                            </Border>
+
+                            <!-- Cột phải: Giá tiền (mỗi dòng 1 giá) -->
+                            <Border Grid.Column="1"
+                                    BackgroundColor="{StaticResource BgInputAlt}"
+                                    StrokeThickness="1.5"
+                                    Stroke="{StaticResource BorderNorm}"
+                                    StrokeShape="RoundRectangle 12"
+                                    Padding="8,6">
+                                <Editor
+                                    Text="{Binding PricesText, Mode=TwoWay}"
+                                    Placeholder="30000&#x0a;20000&#x0a;Phí ship&#x0a;15000"
+                                    PlaceholderColor="{StaticResource TextSub}"
+                                    TextColor="{StaticResource Accent}"
+                                    BackgroundColor="Transparent"
+                                    FontSize="14"
+                                    FontAttributes="Bold"
+                                    HorizontalTextAlignment="End"
+                                    AutoSize="TextChanges"
+                                    MinimumHeightRequest="200" />
+                            </Border>
+                        </Grid>
+
+                        <!-- Ghi chú nhỏ cột phải -->
+                        <Label Text="↑ Dòng có chữ sẽ không được cộng vào tổng"
+                               TextColor="{StaticResource TextSub}"
+                               FontSize="10"
+                               HorizontalOptions="End" />
+
+
+
+                        <!-- TỔNG CỘNG -->
+                        <Border BackgroundColor="#1C1040"
+                                Stroke="{StaticResource Primary}"
+                                StrokeThickness="1.5"
+                                StrokeShape="RoundRectangle 12"
+                                Padding="16,12">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                    <Label Text="TỔNG CỘNG"
+                                           TextColor="{StaticResource TextMain}"
+                                           FontSize="13" FontAttributes="Bold" />
+                                    <Label Text="(chỉ cộng dòng số)"
+                                           TextColor="{StaticResource TextSub}" FontSize="10" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="1"
+                                       Text="{Binding GrandTotalText}"
+                                       TextColor="{StaticResource Accent}"
+                                       FontSize="22" FontAttributes="Bold"
+                                       VerticalOptions="Center" HorizontalOptions="End" />
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ══ 4. GHI CHÚ ════════════════════════════════════ -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="GHI CHÚ FOOTER" Style="{StaticResource SectionLabel}" />
+                        <Border Style="{StaticResource InputWrap}">
+                            <Entry Placeholder="Lời nhắn trên hóa đơn" Text="{Binding Note}"
+                                   Style="{StaticResource EntryBase}" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ══ 5. CỠ CHỮ IN ═══════════════════════════════════ -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0"
+                                   Text="CỠ CHỮ IN"
+                                   Style="{StaticResource SectionLabel}"
+                                   Margin="0" VerticalOptions="Center" />
+                            <Label Grid.Column="1"
+                                   Text="{Binding FontScaleLabel}"
+                                   TextColor="{StaticResource Accent}"
+                                   FontSize="12" FontAttributes="Bold"
+                                   VerticalOptions="Center" />
+                        </Grid>
+                        <Grid ColumnDefinitions="24,*,24" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="A"
+                                   TextColor="{StaticResource TextSub}"
+                                   FontSize="12" VerticalOptions="Center"
+                                   HorizontalOptions="Center" />
+                            <Slider Grid.Column="1"
+                                    Minimum="0.7" Maximum="1.5" Value="{Binding FontScale}"
+                                    ThumbColor="{StaticResource Primary}"
+                                    MinimumTrackColor="{StaticResource Primary}"
+                                    MaximumTrackColor="{StaticResource BorderNorm}"
+                                    VerticalOptions="Center" />
+                            <Label Grid.Column="2" Text="A"
+                                   TextColor="{StaticResource TextMain}"
+                                   FontSize="18" FontAttributes="Bold"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Center" />
+                        </Grid>
+                        <Label Text="💡 Điều chỉnh cỡ chữ phù hợp với máy in của bạn"
+                               TextColor="{StaticResource TextSub}" FontSize="10" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ══ 5. XEM TRƯỚC 58mm ═════════════════════════════ -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="XEM TRƯỚC HÓA ĐƠN 58mm" Style="{StaticResource SectionLabel}" />
+                        <Border HorizontalOptions="Center" BackgroundColor="White"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 4"
+                                Padding="14,18" WidthRequest="220">
+                            <Border.Shadow>
+                                <Shadow Brush="{StaticResource Primary}"
+                                        Opacity="0.2" Offset="0,6" Radius="24" />
+                            </Border.Shadow>
+                            <VerticalStackLayout Spacing="1">
+                                <Label Text="{Binding StoreName}"
+                                       TextColor="#111" FontSize="14" FontAttributes="Bold"
+                                       HorizontalTextAlignment="Center" />
+                                <Label Text="{Binding StoreAddress}"
+                                       TextColor="#555" FontSize="9"
+                                       HorizontalTextAlignment="Center" LineBreakMode="WordWrap" />
+                                <Label Text="================================"
+                                       TextColor="#444" FontSize="7" HorizontalTextAlignment="Center" />
+                     
+                                <Label Text="--------------------------------"
+                                       TextColor="#444" FontSize="7" HorizontalTextAlignment="Center" />
+
+                                <!-- Preview: hiển thị nội dung 2 cột cạnh nhau -->
+                                <Grid ColumnDefinitions="*,80">
+                                    <Label Grid.Column="0"
+                                           Text="{Binding ItemsText}"
+                                           TextColor="#222" FontSize="8"
+                                           LineBreakMode="WordWrap" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding PricesText}"
+                                           TextColor="#222" FontSize="8"
+                                           HorizontalOptions="End"
+                                           HorizontalTextAlignment="End" />
+                                </Grid>
+
+                                <Label Text="================================"
+                                       TextColor="#444" FontSize="7" HorizontalTextAlignment="Center" />
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Label Grid.Column="0" Text="TONG: "
+                                           TextColor="#111" FontSize="11" FontAttributes="Bold" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding GrandTotalText}"
+                                           TextColor="#111" FontSize="11" FontAttributes="Bold"
+                                           HorizontalOptions="End" HorizontalTextAlignment="End" />
+                                </Grid>
+                                <Label Text="{Binding Note}"
+                                       TextColor="#555" FontSize="8"
+                                       HorizontalTextAlignment="Center" LineBreakMode="WordWrap" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <BoxView HeightRequest="20" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ─── BOTTOM BAR ───────────────────────────────────────────── -->
+        <Border Grid.Row="2" BackgroundColor="{StaticResource BgCard}"
+                StrokeThickness="0" Padding="16,12,16,32">
+            <Border.Shadow>
+                <Shadow Brush="#000000" Opacity="0.6" Offset="0,-4" Radius="20" />
+            </Border.Shadow>
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                <ActivityIndicator Grid.Column="0"
+                                   IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}"
+                                   Color="{StaticResource Accent}" WidthRequest="36" HeightRequest="36" />
+                <Button Grid.Column="1" Text="🖨  IN HÓA ĐƠN"
+                        Command="{Binding PrintInvoiceCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}"
+                        BackgroundColor="{StaticResource Primary}"
+                        TextColor="White" FontAttributes="Bold" FontSize="17"
+                        CornerRadius="14" HeightRequest="56">
+                    <Button.Shadow>
+                        <Shadow Brush="{StaticResource Primary}" Opacity="0.5" Offset="0,4" Radius="16" />
+                    </Button.Shadow>
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,437 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>POSPrinter</name>
+    </assembly>
+    <members>
+        <member name="M:POSPrinter.App.CreateWindow(Microsoft.Maui.IActivationState)">
+            <summary>
+            MAUI 9: dùng CreateWindow thay vì MainPage (tránh warning CS0618)
+            </summary>
+        </member>
+        <member name="T:POSPrinter.Converters.MoneyConverter">
+            <summary>Định dạng số tiền VND: 25000 → "25,000"</summary>
+        </member>
+        <member name="T:POSPrinter.Converters.InverseBoolConverter">
+            <summary>Bool đảo ngược</summary>
+        </member>
+        <member name="T:POSPrinter.Converters.BoolToScanTextConverter">
+            <summary>IsScanning → Button text</summary>
+        </member>
+        <member name="T:POSPrinter.Converters.StringToColorConverter">
+            <summary>String color → Color object (dùng cho ConnectionStatusColor)</summary>
+        </member>
+        <member name="T:POSPrinter.Converters.CountToBoolConverter">
+            <summary>Count > 0 → true (dùng inline trong XAML với markup extension)</summary>
+        </member>
+        <member name="T:POSPrinter.Converters.NullToBoolConverter">
+            <summary>null → false, not-null → true</summary>
+        </member>
+        <member name="T:POSPrinter.Models.BluetoothDevice">
+            <summary>
+            Thông tin thiết bị Bluetooth được tìm thấy
+            </summary>
+        </member>
+        <member name="P:POSPrinter.Models.BluetoothDevice.NativeDevice">
+            <summary>
+            Đối tượng native gốc (iOS: CBPeripheral, Android: BluetoothDevice)
+            </summary>
+        </member>
+        <member name="T:POSPrinter.Models.Invoice">
+            <summary>
+            Thông tin đầy đủ của một hóa đơn bán hàng
+            </summary>
+        </member>
+        <member name="P:POSPrinter.Models.Invoice.SubTotal">
+            <summary>Tổng tiền hàng trước thuế/giảm giá</summary>
+        </member>
+        <member name="P:POSPrinter.Models.Invoice.GrandTotal">
+            <summary>Tổng tiền phải trả</summary>
+        </member>
+        <member name="T:POSPrinter.Models.InvoiceItem">
+            <summary>
+            Dòng sản phẩm trong hóa đơn — hỗ trợ nhập liệu trực tiếp trên 2 cột.
+            </summary>
+            <inheritdoc/>
+        </member>
+        <member name="P:POSPrinter.Models.InvoiceItem.Quantity">
+            <summary>Số lượng — mặc định 1, người dùng không cần nhập</summary>
+        </member>
+        <member name="P:POSPrinter.Models.InvoiceItem.PriceText">
+            <summary>
+            Chuỗi giá tiền dùng cho Entry binding (TwoWay).
+            Tự động parse thành UnitPrice khi người dùng nhập.
+            </summary>
+        </member>
+        <member name="P:POSPrinter.Models.InvoiceItem.TotalPrice">
+            <summary>Thành tiền = Số lượng × Đơn giá</summary>
+        </member>
+        <member name="P:POSPrinter.Models.InvoiceItem.Name">
+            <inheritdoc cref="F:POSPrinter.Models.InvoiceItem._name"/>
+        </member>
+        <member name="P:POSPrinter.Models.InvoiceItem.UnitPrice">
+            <inheritdoc cref="F:POSPrinter.Models.InvoiceItem._unitPrice"/>
+        </member>
+        <member name="T:POSPrinter.Platforms.Android.AndroidBluetoothPrinterService">
+            <summary>
+            Android Bluetooth Classic SPP implementation.
+            Liệt kê thiết bị đã ghép đôi (paired) và kết nối qua RFCOMM.
+            </summary>
+        </member>
+        <member name="T:POSPrinter.Services.AppPreferences">
+            <summary>
+            Lưu trữ cài đặt app bằng MAUI Preferences (SQLite key-value nội bộ).
+            Tự động persist qua các lần mở app.
+            </summary>
+        </member>
+        <member name="P:POSPrinter.Services.AppPreferences.FontScale">
+            <summary>Hệ số cỡ chữ: 0.7 → 1.5 (mặc định 1.0)</summary>
+        </member>
+        <member name="P:POSPrinter.Services.AppPreferences.BluetoothPanelCollapsed">
+            <summary>Trạng thái thu gọn của khung Bluetooth</summary>
+        </member>
+        <member name="P:POSPrinter.Services.AppPreferences.StoreInfoPanelCollapsed">
+            <summary>Trạng thái thu gọn của khung Thông tin cửa hàng</summary>
+        </member>
+        <member name="T:POSPrinter.Services.BitmapPrinter">
+            <summary>
+            In hóa đơn bằng cách render text thành bitmap rồi gửi ESC/POS raster GS v 0.
+            Hoạt động với mọi máy in nhiệt 58mm (không cần ROM tiếng Việt).
+            Để đảm bảo font nhất quán giữa Android và Windows,
+            dùng RobotoMono-Regular.ttf + RobotoMono-Bold.ttf trong Resources/Raw/.
+            Đặt 2 file đó vào: D:\QRCode\POSPrinter\Resources\Raw\
+            Địa chỉ tải: https://fonts.google.com/specimen/Roboto+Mono
+            </summary>
+        </member>
+        <member name="M:POSPrinter.Services.BitmapPrinter.BitmapToRaster(SkiaSharp.SKBitmap)">
+            <summary>
+            Chuyển SKBitmap → lệnh ESC/POS GS v 0 (raster bit image).
+            Định dạng: GS v 0 m xL xH yL yH [dữ liệu theo hàng, MSB trước]
+            </summary>
+        </member>
+        <member name="T:POSPrinter.Services.PrinterEncoding">
+            <summary>Chế độ encoding cho máy in nhiệt POS</summary>
+        </member>
+        <member name="F:POSPrinter.Services.PrinterEncoding.AsciiNoDiacritics">
+            <summary>Bỏ dấu → ASCII thuần. Hoạt động với 100% máy in.</summary>
+        </member>
+        <member name="F:POSPrinter.Services.PrinterEncoding.Utf8Raw">
+            <summary>UTF-8 thô (không BOM). Máy in Xprinter/HPRT mới hỗ trợ.</summary>
+        </member>
+        <member name="F:POSPrinter.Services.PrinterEncoding.Cp1258_Page33">
+            <summary>Windows-1258 + ESC t 33. ★ EPSON chính hãng và tương thích.</summary>
+        </member>
+        <member name="F:POSPrinter.Services.PrinterEncoding.Cp1258_Page30">
+            <summary>Windows-1258 + ESC t 30. Máy in có ROM Vietnamese cũ.</summary>
+        </member>
+        <member name="F:POSPrinter.Services.PrinterEncoding.Cp1258_Page16">
+            <summary>Windows-1258 + ESC t 16. Một số firmware khác.</summary>
+        </member>
+        <member name="F:POSPrinter.Services.PrinterEncoding.Cp1258_Page6">
+            <summary>Windows-1258 + ESC t 6. Một số firmware khác.</summary>
+        </member>
+        <member name="F:POSPrinter.Services.PrinterEncoding.Cp1258_NoCmd">
+            <summary>Windows-1258 không gửỉ ESC t (máy tự cấu hình sẵn).</summary>
+        </member>
+        <member name="T:POSPrinter.Services.EscPosBuilder">
+            <summary>
+            Tạo lệnh ESC/POS cho máy in nhiệt 58mm.
+            Thử lần lượt PrinterEncoding cho đến khi tiếng Việt hiển thị đúng.
+            </summary>
+        </member>
+        <member name="T:POSPrinter.Services.IBluetoothPrinterService">
+            <summary>
+            Interface cho dịch vụ Bluetooth - scan và in ESC/POS
+            </summary>
+        </member>
+        <member name="P:POSPrinter.Services.IBluetoothPrinterService.IsBluetoothEnabled">
+            <summary>Trạng thái Bluetooth hiện tại</summary>
+        </member>
+        <member name="P:POSPrinter.Services.IBluetoothPrinterService.ConnectedDevice">
+            <summary>Thiết bị đang kết nối</summary>
+        </member>
+        <member name="P:POSPrinter.Services.IBluetoothPrinterService.IsScanning">
+            <summary>Đang scan hay không</summary>
+        </member>
+        <member name="M:POSPrinter.Services.IBluetoothPrinterService.StartScanAsync(System.Action{POSPrinter.Models.BluetoothDevice},System.Threading.CancellationToken)">
+            <summary>Bắt đầu quét thiết bị Bluetooth</summary>
+        </member>
+        <member name="M:POSPrinter.Services.IBluetoothPrinterService.StopScanAsync">
+            <summary>Dừng quét</summary>
+        </member>
+        <member name="M:POSPrinter.Services.IBluetoothPrinterService.ConnectAsync(POSPrinter.Models.BluetoothDevice)">
+            <summary>Kết nối đến thiết bị</summary>
+        </member>
+        <member name="M:POSPrinter.Services.IBluetoothPrinterService.DisconnectAsync">
+            <summary>Ngắt kết nối</summary>
+        </member>
+        <member name="M:POSPrinter.Services.IBluetoothPrinterService.PrintAsync(System.Byte[])">
+            <summary>Gửi dữ liệu ESC/POS đến máy in</summary>
+        </member>
+        <member name="T:POSPrinter.ViewModels.InvoiceViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="M:POSPrinter.ViewModels.InvoiceViewModel.#ctor">
+            <summary>Constructor không tham số dùng cho design-time.</summary>
+        </member>
+        <member name="M:POSPrinter.ViewModels.InvoiceViewModel.#ctor(POSPrinter.Services.IBluetoothPrinterService)">
+            <summary>Constructor chính — được DI inject.</summary>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.DiscoveredDevices">
+            <inheritdoc cref="F:POSPrinter.ViewModels.InvoiceViewModel._discoveredDevices"/>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.SelectedDevice">
+            <inheritdoc cref="F:POSPrinter.ViewModels.InvoiceViewModel._selectedDevice"/>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.IsDeviceConnected">
+            <inheritdoc cref="F:POSPrinter.ViewModels.InvoiceViewModel._isDeviceConnected"/>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.IsScanning">
+            <inheritdoc cref="F:POSPrinter.ViewModels.InvoiceViewModel._isScanning"/>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.IsBusy">
+            <inheritdoc cref="F:POSPrinter.ViewModels.InvoiceViewModel._isBusy"/>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.StatusMessage">
+            <inheritdoc cref="F:POSPrinter.ViewModels.InvoiceViewModel._statusMessage"/>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.StoreName">
+            <inheritdoc cref="F:POSPrinter.ViewModels.InvoiceViewModel._storeName"/>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.StoreAddress">
+            <inheritdoc cref="F:POSPrinter.ViewModels.InvoiceViewModel._storeAddress"/>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.Cashier">
+            <inheritdoc cref="F:POSPrinter.ViewModels.InvoiceViewModel._cashier"/>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.Note">
+            <inheritdoc cref="F:POSPrinter.ViewModels.InvoiceViewModel._note"/>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.InvoiceNumber">
+            <inheritdoc cref="F:POSPrinter.ViewModels.InvoiceViewModel._invoiceNumber"/>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.ItemsText">
+            <inheritdoc cref="F:POSPrinter.ViewModels.InvoiceViewModel._itemsText"/>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.PricesText">
+            <inheritdoc cref="F:POSPrinter.ViewModels.InvoiceViewModel._pricesText"/>
+        </member>
+        <member name="F:POSPrinter.ViewModels.InvoiceViewModel.toggleBtPanelCommand">
+            <summary>The backing field for <see cref="P:POSPrinter.ViewModels.InvoiceViewModel.ToggleBtPanelCommand"/>.</summary>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.ToggleBtPanelCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand"/> instance wrapping <see cref="M:POSPrinter.ViewModels.InvoiceViewModel.ToggleBtPanel"/>.</summary>
+        </member>
+        <member name="F:POSPrinter.ViewModels.InvoiceViewModel.toggleStoreInfoPanelCommand">
+            <summary>The backing field for <see cref="P:POSPrinter.ViewModels.InvoiceViewModel.ToggleStoreInfoPanelCommand"/>.</summary>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.ToggleStoreInfoPanelCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand"/> instance wrapping <see cref="M:POSPrinter.ViewModels.InvoiceViewModel.ToggleStoreInfoPanel"/>.</summary>
+        </member>
+        <member name="F:POSPrinter.ViewModels.InvoiceViewModel.refreshInvoiceNumberCommand">
+            <summary>The backing field for <see cref="P:POSPrinter.ViewModels.InvoiceViewModel.RefreshInvoiceNumberCommand"/>.</summary>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.RefreshInvoiceNumberCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand"/> instance wrapping <see cref="M:POSPrinter.ViewModels.InvoiceViewModel.RefreshInvoiceNumber"/>.</summary>
+        </member>
+        <member name="F:POSPrinter.ViewModels.InvoiceViewModel.startScanCommand">
+            <summary>The backing field for <see cref="P:POSPrinter.ViewModels.InvoiceViewModel.StartScanCommand"/>.</summary>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.StartScanCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:POSPrinter.ViewModels.InvoiceViewModel.StartScanAsync"/>.</summary>
+        </member>
+        <member name="F:POSPrinter.ViewModels.InvoiceViewModel.stopScanCommand">
+            <summary>The backing field for <see cref="P:POSPrinter.ViewModels.InvoiceViewModel.StopScanCommand"/>.</summary>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.StopScanCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:POSPrinter.ViewModels.InvoiceViewModel.StopScanAsync"/>.</summary>
+        </member>
+        <member name="F:POSPrinter.ViewModels.InvoiceViewModel.connectCommand">
+            <summary>The backing field for <see cref="P:POSPrinter.ViewModels.InvoiceViewModel.ConnectCommand"/>.</summary>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.ConnectCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:POSPrinter.ViewModels.InvoiceViewModel.ConnectAsync"/>.</summary>
+        </member>
+        <member name="F:POSPrinter.ViewModels.InvoiceViewModel.disconnectCommand">
+            <summary>The backing field for <see cref="P:POSPrinter.ViewModels.InvoiceViewModel.DisconnectCommand"/>.</summary>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.DisconnectCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:POSPrinter.ViewModels.InvoiceViewModel.DisconnectAsync"/>.</summary>
+        </member>
+        <member name="F:POSPrinter.ViewModels.InvoiceViewModel.printInvoiceCommand">
+            <summary>The backing field for <see cref="P:POSPrinter.ViewModels.InvoiceViewModel.PrintInvoiceCommand"/>.</summary>
+        </member>
+        <member name="P:POSPrinter.ViewModels.InvoiceViewModel.PrintInvoiceCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:POSPrinter.ViewModels.InvoiceViewModel.PrintInvoiceAsync"/>.</summary>
+        </member>
+        <member name="T:POSPrinter.Resource">
+            <summary>
+            Android Resource Designer class.
+            Exposes the Android Resource designer assembly into the project Namespace.
+            </summary>
+        </member>
+        <member name="T:StubBluetoothPrinterService">
+            <summary>
+            Stub implementation cho các nền tảng không hỗ trợ Bluetooth.
+            </summary>
+        </member>
+        <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs">
+            <summary>
+            A helper type providing cached, reusable <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instances
+            for all properties generated with <see cref="T:CommunityToolkit.Mvvm.ComponentModel.ObservablePropertyAttribute"/>.
+            </summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Name">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Name" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.TotalPrice">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "TotalPrice" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.UnitPrice">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "UnitPrice" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.PriceText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "PriceText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.DiscoveredDevices">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "DiscoveredDevices" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedDevice">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedDevice" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsConnected">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsConnected" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.ConnectionStatusText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "ConnectionStatusText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.ConnectionStatusColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "ConnectionStatusColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsDeviceConnected">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsDeviceConnected" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsScanning">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsScanning" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsBusy">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsBusy" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.StatusMessage">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "StatusMessage" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.StoreName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "StoreName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.StoreAddress">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "StoreAddress" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Cashier">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Cashier" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Note">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Note" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.InvoiceNumber">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "InvoiceNumber" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.ItemsText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "ItemsText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.PreviewLines">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "PreviewLines" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.PricesText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "PricesText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GrandTotal">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GrandTotal" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GrandTotalText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GrandTotalText" generated properties.</summary>
+        </member>
+        <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs">
+            <summary>
+            A helper type providing cached, reusable <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instances
+            for all properties generated with <see cref="T:CommunityToolkit.Mvvm.ComponentModel.ObservablePropertyAttribute"/>.
+            </summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Name">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Name" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.TotalPrice">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "TotalPrice" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.UnitPrice">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "UnitPrice" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.PriceText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "PriceText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.DiscoveredDevices">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "DiscoveredDevices" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedDevice">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedDevice" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsConnected">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsConnected" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.ConnectionStatusText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "ConnectionStatusText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.ConnectionStatusColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "ConnectionStatusColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsDeviceConnected">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsDeviceConnected" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsScanning">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsScanning" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsBusy">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsBusy" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.StatusMessage">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "StatusMessage" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.StoreName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "StoreName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.StoreAddress">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "StoreAddress" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Cashier">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Cashier" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Note">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Note" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.InvoiceNumber">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "InvoiceNumber" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.ItemsText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "ItemsText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.PreviewLines">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "PreviewLines" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.PricesText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "PricesText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GrandTotal">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GrandTotal" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GrandTotalText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GrandTotalText" generated properties.</summary>
+        </member>
+    </members>
+</doc>
