@@ -46,6 +46,7 @@ jobs:
             -c Release \
             /p:TargetFrameworks=net9.0-ios \
             /p:RuntimeIdentifier=ios-arm64 \
+            /p:PlatformTarget=arm64 \
             /p:CodesignKey="" \
             /p:CodesignProvision="" \
             /p:EnableCodeSigning=false \
