@@ -21,20 +21,13 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Select latest Xcode
-        run: |
-          # Liệt kê Xcode versions có trên runner
-          ls /Applications/ | grep Xcode
-          # Chọn version mới nhất tương thích
-          XCODE=$(ls /Applications/ | grep "^Xcode" | sort -V | tail -1)
-          echo "Using: $XCODE"
-          sudo xcode-select -s "/Applications/$XCODE/Contents/Developer"
-          xcodebuild -version
+      - name: Select Xcode 26.5 (matches .NET iOS SDK)
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.5'
 
-      - name: Install & update MAUI iOS workload
-        run: |
-          dotnet workload install maui-ios ios
-          dotnet workload update
+      - name: Install MAUI iOS workload
+        run: dotnet workload install maui-ios ios
 
       - name: Restore (iOS only)
         run: dotnet restore POSPrinter.csproj /p:TargetFrameworks=net9.0-ios
