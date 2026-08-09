@@ -35,7 +35,7 @@ jobs:
             -f net9.0-ios \
             -c Release \
             /p:TargetFrameworks=net9.0-ios \
-            /p:RuntimeIdentifier=ios-arm64 \
+            /p:RuntimeIdentifier=iossimulator-x64 \
             /p:CodesignKey="" \
             /p:CodesignProvision="" \
             /p:EnableCodeSigning=false \
