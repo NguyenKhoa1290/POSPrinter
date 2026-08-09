@@ -27,11 +27,11 @@ jobs:
           dotnet workload install ios
 
       - name: Restore NuGet packages
-        run: dotnet restore POSPrinter/POSPrinter.csproj
+        run: dotnet restore POSPrinter.csproj
 
       - name: Build iOS (no code signing)
         run: |
-          dotnet build POSPrinter/POSPrinter.csproj \
+          dotnet build POSPrinter.csproj \
             -f net9.0-ios \
             -c Release \
             /p:RuntimeIdentifier=ios-arm64 \
@@ -44,5 +44,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ios-build
-          path: POSPrinter/bin/Release/net9.0-ios/
+          path: bin/Release/net9.0-ios/
           if-no-files-found: warn
