@@ -52,9 +52,6 @@ public class IosBleBluetoothPrinterService : NSObject, IBluetoothPrinterService,
     private TaskCompletionSource<bool>? _connectTcs;
     private bool _isScanning;
 
-    /// <summary>Hoàn tất khi CBCentralManager đạt trạng thái PoweredOn.</summary>
-    private TaskCompletionSource<bool>? _poweredOnTcs;
-
     // ─── IBluetoothPrinterService ─────────────────────────────────────────────
 
     public bool IsBluetoothEnabled => _centralManager?.State == CBManagerState.PoweredOn;
@@ -112,21 +109,37 @@ public class IosBleBluetoothPrinterService : NSObject, IBluetoothPrinterService,
         };
     }
 
-    /// <summary>Tạo CBCentralManager (nếu chưa có) và chờ tới khi PoweredOn.</summary>
+    /// <summary>
+    /// Tạo CBCentralManager (nếu chưa có) và chờ tới khi PoweredOn.
+    /// Đọc thẳng State theo chu kỳ thay vì chờ event: delegate UpdatedState chạy
+    /// trên main queue nên có thể bắn PoweredOn TRƯỚC khi luồng gọi kịp đăng ký chờ.
+    /// </summary>
     private async Task<bool> EnsureManagerReadyAsync(CancellationToken cancellationToken)
     {
         _centralManager ??= new CBCentralManager(this, null);
 
-        if (_centralManager.State == CBManagerState.PoweredOn)
-            return true;
+        // Chờ tối đa 10s — người dùng có thể đang bật Bluetooth / cấp quyền
+        for (int i = 0; i < 50; i++)
+        {
+            switch (_centralManager.State)
+            {
+                case CBManagerState.PoweredOn:
+                    return true;
 
-        var tcs = _poweredOnTcs ??= new TaskCompletionSource<bool>();
+                // Trạng thái cuối, chờ thêm cũng vô ích
+                case CBManagerState.Unsupported:
+                case CBManagerState.Unauthorized:
+                case CBManagerState.PoweredOff:
+                    return false;
+            }
 
-        // Chờ tối đa 10s: người dùng có thể đang bật Bluetooth / cấp quyền
-        var timeout = Task.Delay(10_000, cancellationToken);
-        var completed = await Task.WhenAny(tcs.Task, timeout);
+            if (cancellationToken.IsCancellationRequested) return false;
 
-        return completed == tcs.Task && _centralManager.State == CBManagerState.PoweredOn;
+            try { await Task.Delay(200, cancellationToken); }
+            catch (OperationCanceledException) { return false; }
+        }
+
+        return _centralManager.State == CBManagerState.PoweredOn;
     }
 
     public Task StopScanAsync()
@@ -212,14 +225,9 @@ public class IosBleBluetoothPrinterService : NSObject, IBluetoothPrinterService,
     [Export("centralManagerDidUpdateState:")]
     public void UpdatedState(CBCentralManager central)
     {
-        if (central.State == CBManagerState.PoweredOn)
+        if (central.State != CBManagerState.PoweredOn)
         {
-            _poweredOnTcs?.TrySetResult(true);
-        }
-        else
-        {
-            // Bluetooth tắt / mất quyền → reset để lần sau chờ lại
-            _poweredOnTcs = null;
+            // Bluetooth tắt / mất quyền → phiên quét hiện tại coi như kết thúc
             _isScanning = false;
         }
     }

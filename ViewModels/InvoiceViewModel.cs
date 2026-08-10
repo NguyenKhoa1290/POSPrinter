@@ -11,6 +11,11 @@ public partial class InvoiceViewModel : ObservableObject
     private readonly IBluetoothPrinterService? _printerService;
     private CancellationTokenSource? _scanCts;
 
+    // Auto-reconnect chạy nền và cũng chiếm sóng Bluetooth — phải huỷ hẳn
+    // trước khi người dùng quét thủ công, nếu không nó sẽ dừng phiên quét đó.
+    private CancellationTokenSource? _autoReconnectCts;
+    private Task? _autoReconnectTask;
+
     /// <summary>Constructor không tham số dùng cho design-time.</summary>
     public InvoiceViewModel() : this(new StubBluetoothPrinterService()) { }
 
@@ -34,7 +39,8 @@ public partial class InvoiceViewModel : ObservableObject
         _pricesText = "";
 
         // Tự động kết nối thiết bị lần trước (background)
-        _ = AutoReconnectAsync();
+        _autoReconnectCts = new CancellationTokenSource();
+        _autoReconnectTask = AutoReconnectAsync(_autoReconnectCts.Token);
     }
 
     // ─── Bluetooth ────────────────────────────────────────────────────────────
@@ -210,6 +216,10 @@ public partial class InvoiceViewModel : ObservableObject
     {
         if (IsScanning) return;
         if (_printerService == null) { StatusMessage = "⚠ Dịch vụ Bluetooth chưa sẵn sàng"; return; }
+
+        // Nhường sóng: đợi auto-reconnect dừng hẳn rồi mới quét
+        await CancelAutoReconnectAsync();
+
         DiscoveredDevices.Clear();
         IsScanning = true;
         StatusMessage = "Đang tìm kiếm thiết bị...";
@@ -234,7 +244,9 @@ public partial class InvoiceViewModel : ObservableObject
             IsScanning = false;
             StatusMessage = DiscoveredDevices.Count > 0
                 ? $"Tìm thấy {DiscoveredDevices.Count} thiết bị"
-                : "Không tìm thấy thiết bị nào";
+                : _printerService.IsBluetoothEnabled
+                    ? "Không tìm thấy thiết bị nào"
+                    : "⚠ Bluetooth chưa bật hoặc chưa được cấp quyền";
         }
     }
 
@@ -250,6 +262,10 @@ public partial class InvoiceViewModel : ObservableObject
     private async Task ConnectAsync()
     {
         if (SelectedDevice == null || _printerService == null) return;
+
+        // Không để auto-reconnect chen ngang phiên kết nối thủ công
+        await CancelAutoReconnectAsync();
+
         IsBusy = true;
         StatusMessage = $"Đang kết nối {SelectedDevice.Name}...";
         bool ok = await _printerService.ConnectAsync(SelectedDevice);
@@ -326,14 +342,27 @@ public partial class InvoiceViewModel : ObservableObject
 
     // ─── Auto-reconnect ──────────────────────────────────────────────────────
 
-    private async Task AutoReconnectAsync()
+    /// <summary>Huỷ auto-reconnect và đợi nó nhả sóng Bluetooth ra hẳn.</summary>
+    private async Task CancelAutoReconnectAsync()
+    {
+        if (_autoReconnectTask == null) return;
+
+        _autoReconnectCts?.Cancel();
+        try { await _autoReconnectTask; } catch { /* đã huỷ */ }
+
+        _autoReconnectCts?.Dispose();
+        _autoReconnectCts = null;
+        _autoReconnectTask = null;
+    }
+
+    private async Task AutoReconnectAsync(CancellationToken cancellationToken)
     {
         string lastAddr = AppPreferences.LastDeviceAddress;
         string lastName = AppPreferences.LastDeviceName;
         if (string.IsNullOrEmpty(lastAddr) || _printerService == null) return;
 
         // Chờ app + BLE stack khởi động hoàn tất (iOS cần lâu hơn Android)
-        await Task.Delay(2500);
+        await Task.Delay(2500, cancellationToken);
 
         try
         {
@@ -348,10 +377,11 @@ public partial class InvoiceViewModel : ObservableObject
             //    Android trả kết quả ngay trong callback (paired devices) nên TCS
             //    hoàn tất tức thì; iOS/BLE cần vài giây nên phải chờ thật sự thay vì
             //    dừng quét ngay sau khi StartScanAsync trả về.
-            if (target == null)
+            if (target == null && !cancellationToken.IsCancellationRequested)
             {
                 var found = new TaskCompletionSource<BluetoothDevice>();
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(12));
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                cts.CancelAfter(TimeSpan.FromSeconds(12));
 
                 await _printerService.StartScanAsync(device =>
                 {
@@ -359,13 +389,20 @@ public partial class InvoiceViewModel : ObservableObject
                         found.TrySetResult(device);
                 }, cts.Token);
 
-                var completed = await Task.WhenAny(found.Task, Task.Delay(TimeSpan.FromSeconds(12)));
+                // Chờ tới khi tìm thấy, hết 12s, hoặc bị huỷ (người dùng bấm quét tay)
+                var stopped = new TaskCompletionSource<bool>();
+                using (cts.Token.Register(() => stopped.TrySetResult(true)))
+                {
+                    await Task.WhenAny(found.Task, stopped.Task);
+                }
 
                 await _printerService.StopScanAsync();
 
-                if (completed == found.Task)
+                if (found.Task.IsCompletedSuccessfully)
                     target = found.Task.Result;
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             if (target is { } device)
             {
@@ -378,6 +415,13 @@ public partial class InvoiceViewModel : ObservableObject
                 });
 
                 bool ok = await _printerService.ConnectAsync(device);
+
+                if (ok)
+                {
+                    // Làm mới thông tin đã lưu (tên máy in có thể đổi)
+                    AppPreferences.LastDeviceAddress = device.Address;
+                    AppPreferences.LastDeviceName    = device.Name;
+                }
 
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
@@ -393,6 +437,10 @@ public partial class InvoiceViewModel : ObservableObject
                 await MainThread.InvokeOnMainThreadAsync(() =>
                     StatusMessage = "Chưa kết nối máy in");
             }
+        }
+        catch (OperationCanceledException)
+        {
+            // Người dùng chủ động quét/kết nối tay — không ghi đè trạng thái
         }
         catch
         {
