@@ -28,25 +28,25 @@
     <AppXManifest Include="D:\QRCode\POSPrinter\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2026-08-09T15:18:09.061</Modified>
+      <Modified>2026-08-10T09:10:48.089</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="D:\QRCode\POSPrinter\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\resources.pri">
       <PackagePath>resources.pri</PackagePath>
-      <Modified>2026-08-09T15:18:08.948</Modified>
+      <Modified>2026-08-10T09:10:47.826</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="D:\QRCode\POSPrinter\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\POSPrinter.runtimeconfig.json">
       <PackagePath>POSPrinter.runtimeconfig.json</PackagePath>
-      <Modified>2026-08-09T14:58:13.017</Modified>
+      <Modified>2026-08-10T09:10:47.578</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="D:\QRCode\POSPrinter\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\POSPrinter.dll">
       <PackagePath>POSPrinter.dll</PackagePath>
-      <Modified>2026-08-09T15:18:08.411</Modified>
+      <Modified>2026-08-10T09:10:46.109</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="D:\QRCode\POSPrinter\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\apphost.exe">
       <PackagePath>POSPrinter.exe</PackagePath>
-      <Modified>2026-08-09T15:18:08.416</Modified>
+      <Modified>2026-08-10T09:10:46.128</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="D:\QRCode\POSPrinter\Resources\Raw\AboutAssets.txt">
       <PackagePath>AboutAssets.txt</PackagePath>
@@ -678,7 +678,7 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="D:\QRCode\POSPrinter\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\POSPrinter.deps.json">
       <PackagePath>POSPrinter.deps.json</PackagePath>
-      <Modified>2026-08-09T15:12:32.922</Modified>
+      <Modified>2026-08-10T09:10:47.539</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\NguyenKhoa\.nuget\packages\microsoft.maui.controls.core\9.0.120\lib\net9.0-windows10.0.19041\Microsoft.Maui.Controls.pri">
       <PackagePath>Microsoft.Maui.Controls.pri</PackagePath>

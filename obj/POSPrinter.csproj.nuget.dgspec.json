@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "d:\\QRCode\\POSPrinter\\POSPrinter.csproj": {}
+    "D:\\QRCode\\POSPrinter\\POSPrinter.csproj": {}
   },
   "projects": {
-    "d:\\QRCode\\POSPrinter\\POSPrinter.csproj": {
+    "D:\\QRCode\\POSPrinter\\POSPrinter.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\QRCode\\POSPrinter\\POSPrinter.csproj",
+        "projectUniqueName": "D:\\QRCode\\POSPrinter\\POSPrinter.csproj",
         "projectName": "POSPrinter",
-        "projectPath": "d:\\QRCode\\POSPrinter\\POSPrinter.csproj",
+        "projectPath": "D:\\QRCode\\POSPrinter\\POSPrinter.csproj",
         "packagesPath": "C:\\Users\\NguyenKhoa\\.nuget\\packages\\",
-        "outputPath": "d:\\QRCode\\POSPrinter\\obj\\",
+        "outputPath": "D:\\QRCode\\POSPrinter\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "fallbackFolders": [
@@ -228,8 +228,24 @@
           "warn": true,
           "downloadDependencies": [
             {
+              "name": "Microsoft.AspNetCore.App.Runtime.win-x64",
+              "version": "[9.0.17, 9.0.17]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Crossgen2.win-x64",
+              "version": "[9.0.17, 9.0.17]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Runtime.win-x64",
+              "version": "[9.0.17, 9.0.17]"
+            },
+            {
               "name": "Microsoft.Windows.SDK.NET.Ref",
               "version": "[10.0.19041.57, 10.0.19041.57]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Runtime.win-x64",
+              "version": "[9.0.17, 9.0.17]"
             }
           ],
           "frameworkReferences": {
