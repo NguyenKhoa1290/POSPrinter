@@ -315,5 +315,3 @@ D:\QRCode\POSPrinter\bin\Debug\net9.0-ios\iossimulator-x64\Info.plist
 D:\QRCode\POSPrinter\bin\Debug\net9.0-ios\iossimulator-x64\CodeResources
 D:\QRCode\POSPrinter\bin\Debug\net9.0-ios\iossimulator-x64\libSkiaSharp
 d:\QRCode\POSPrinter\obj\Debug\net9.0-ios\iossimulator-x64\POSPrinter.sourcelink.json
-d:\QRCode\POSPrinter\bin\Debug\net9.0-ios\iossimulator-x64\CommunityToolkit.Maui.dll
-d:\QRCode\POSPrinter\bin\Debug\net9.0-ios\iossimulator-x64\CommunityToolkit.Maui.Core.dll

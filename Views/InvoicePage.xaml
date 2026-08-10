@@ -6,7 +6,6 @@
     xmlns:vm="clr-namespace:POSPrinter.ViewModels"
     xmlns:model="clr-namespace:POSPrinter.Models"
     xmlns:converters="clr-namespace:POSPrinter.Converters"
-    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     x:Name="PageRoot"
     Title="POS Printer"
     BackgroundColor="#0F0F1A"
@@ -558,19 +557,12 @@
                                                 StrokeThickness="1" Stroke="{StaticResource BorderNorm}"
                                                 StrokeShape="RoundRectangle 10" Padding="12,10">
 
-                                            <!-- Bấm = xem chi tiết, ấn giữ = xóa -->
+                                            <!-- Bấm để mở chi tiết; nút xóa nằm trong phần chi tiết -->
                                             <Border.GestureRecognizers>
                                                 <TapGestureRecognizer
                                                     Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.ToggleHistoryDetailCommand}"
                                                     CommandParameter="{Binding .}" />
                                             </Border.GestureRecognizers>
-
-                                            <Border.Behaviors>
-                                                <toolkit:TouchBehavior
-                                                    LongPressDuration="600"
-                                                    LongPressCommand="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteHistoryItemCommand}"
-                                                    LongPressCommandParameter="{Binding .}" />
-                                            </Border.Behaviors>
 
                                             <VerticalStackLayout Spacing="3">
 
@@ -671,9 +663,11 @@
                                                            TextColor="{Binding SyncColor, Converter={StaticResource StringToColor}}"
                                                            FontSize="10" />
 
-                                                    <Label Text="Ấn giữ vào hóa đơn để xóa"
-                                                           TextColor="{StaticResource TextSub}"
-                                                           FontSize="9" FontAttributes="Italic" />
+                                                    <Button Text="Xóa hóa đơn này"
+                                                            Style="{StaticResource BtnDanger}"
+                                                            Margin="0,4,0,0"
+                                                            Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteHistoryItemCommand}"
+                                                            CommandParameter="{Binding .}" />
                                                 </VerticalStackLayout>
                                             </VerticalStackLayout>
                                         </Border>

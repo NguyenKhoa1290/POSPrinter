@@ -202,6 +202,3 @@ D:\QRCode\POSPrinter\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\MultipleQual
 D:\QRCode\POSPrinter\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\ProjectArchitectures.txt
 D:\QRCode\POSPrinter\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\.winmd_cache\$SkiaSharp.Views.WinUI.Native.winmd_638689436520000000.json
 d:\QRCode\POSPrinter\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\POSPrinter.sourcelink.json
-d:\QRCode\POSPrinter\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\CommunityToolkit.Maui.dll
-d:\QRCode\POSPrinter\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\CommunityToolkit.Maui.Core.dll
-d:\QRCode\POSPrinter\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\System.Speech.dll
