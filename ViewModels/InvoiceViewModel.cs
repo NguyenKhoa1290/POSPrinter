@@ -219,8 +219,11 @@ public partial class InvoiceViewModel : ObservableObject
         {
             await _printerService.StartScanAsync(device =>
             {
-                if (!DiscoveredDevices.Any(d => d.Address == device.Address))
-                    DiscoveredDevices.Add(device);
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    if (!DiscoveredDevices.Any(d => d.Address == device.Address))
+                        DiscoveredDevices.Add(device);
+                });
             }, _scanCts.Token);
             await Task.Delay(10_000, _scanCts.Token);
         }
@@ -319,44 +322,62 @@ public partial class InvoiceViewModel : ObservableObject
         string lastName = AppPreferences.LastDeviceName;
         if (string.IsNullOrEmpty(lastAddr) || _printerService == null) return;
 
-        await Task.Delay(1500); // Chờ app khởi động xong
-        StatusMessage = $"Đang kết nối lại {lastName}...";
+        // Chờ app + BLE stack khởi động hoàn tất (iOS cần lâu hơn Android)
+        await Task.Delay(2500);
 
         try
         {
+            await MainThread.InvokeOnMainThreadAsync(() =>
+                StatusMessage = $"Đang kết nối lại {lastName}...");
+
             // Quét paired devices, tìm địa chỉ khớp
-            var found = false;
+            BluetoothDevice? target = null;
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(8));
+
             await _printerService.StartScanAsync(device =>
             {
-                if (!found && device.Address == lastAddr)
-                {
-                    found = true;
-                    DiscoveredDevices.Add(device);
-                    SelectedDevice = device;
-                }
-            }, CancellationToken.None);
+                if (target == null && device.Address == lastAddr)
+                    target = device;
+            }, cts.Token);
 
             await _printerService.StopScanAsync();
 
-            if (SelectedDevice != null)
+            if (target != null)
             {
-                bool ok = await _printerService.ConnectAsync(SelectedDevice);
-                IsDeviceConnected = ok;
-                StatusMessage = ok
-                    ? $"✓ Tự động kết nối {lastName}"
-                    : "Không thể kết nối lại — ghép đôi thủ công";
+                // Cập nhật UI trên main thread
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    if (!DiscoveredDevices.Any(d => d.Address == target.Address))
+                        DiscoveredDevices.Add(target);
+                    SelectedDevice = target;
+                });
 
-                // Nếu đã kết nối → thu gọn BT panel
-                if (ok) IsBtCollapsed = true;
+                bool ok = await _printerService.ConnectAsync(target);
+
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    IsDeviceConnected = ok;
+                    StatusMessage = ok
+                        ? $"✓ Tự động kết nối {lastName}"
+                        : "Không thể kết nối lại — thử thủ công";
+                    if (ok) IsBtCollapsed = true;
+                });
             }
             else
             {
-                StatusMessage = "Chưa kết nối máy in";
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                    StatusMessage = "Chưa kết nối máy in");
             }
         }
         catch
         {
-            StatusMessage = "Chưa kết nối máy in";
+            // Không crash app — chỉ hiện trạng thái mặc định
+            try
+            {
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                    StatusMessage = "Chưa kết nối máy in");
+            }
+            catch { /* app chưa sẵn sàng */ }
         }
     }
 
