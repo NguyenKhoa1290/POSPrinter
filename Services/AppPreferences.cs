@@ -62,4 +62,26 @@ public static class AppPreferences
         get => Preferences.Default.Get("store_info_collapsed", false);
         set => Preferences.Default.Set("store_info_collapsed", value);
     }
+
+    /// <summary>Trạng thái thu gọn của khung Lịch sử hóa đơn</summary>
+    public static bool HistoryPanelCollapsed
+    {
+        get => Preferences.Default.Get("history_collapsed", true);
+        set => Preferences.Default.Set("history_collapsed", value);
+    }
+
+    // ─── Firebase ─────────────────────────────────────────────────────────────
+    /// <summary>Ghi đè FirebaseConfig.DefaultDatabaseUrl lúc chạy (để trống = dùng hằng số).</summary>
+    public static string FirebaseUrl
+    {
+        get => Preferences.Default.Get("firebase_url", "");
+        set => Preferences.Default.Set("firebase_url", value);
+    }
+
+    /// <summary>Ghi đè FirebaseConfig.DefaultAuthSecret lúc chạy.</summary>
+    public static string FirebaseSecret
+    {
+        get => Preferences.Default.Get("firebase_secret", "");
+        set => Preferences.Default.Set("firebase_secret", value);
+    }
 }

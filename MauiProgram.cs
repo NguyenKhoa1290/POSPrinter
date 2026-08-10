@@ -39,6 +39,9 @@ public static class MauiProgram
             StubBluetoothPrinterService>();
 #endif
 
+        // Lịch sử hóa đơn — lưu cục bộ + đồng bộ Firebase Realtime Database
+        builder.Services.AddSingleton<InvoiceHistoryService>();
+
         // ── Register ViewModels & Pages ────────────────────────────────────
         builder.Services.AddSingleton<InvoiceViewModel>();
         builder.Services.AddSingleton<InvoicePage>();

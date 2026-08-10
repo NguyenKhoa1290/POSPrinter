@@ -9,6 +9,7 @@ namespace POSPrinter.ViewModels;
 public partial class InvoiceViewModel : ObservableObject
 {
     private readonly IBluetoothPrinterService? _printerService;
+    private readonly InvoiceHistoryService _historyService;
     private CancellationTokenSource? _scanCts;
 
     // Auto-reconnect chạy nền và cũng chiếm sóng Bluetooth — phải huỷ hẳn
@@ -17,12 +18,13 @@ public partial class InvoiceViewModel : ObservableObject
     private Task? _autoReconnectTask;
 
     /// <summary>Constructor không tham số dùng cho design-time.</summary>
-    public InvoiceViewModel() : this(new StubBluetoothPrinterService()) { }
+    public InvoiceViewModel() : this(new StubBluetoothPrinterService(), new InvoiceHistoryService()) { }
 
     /// <summary>Constructor chính — được DI inject.</summary>
-    public InvoiceViewModel(IBluetoothPrinterService printerService)
+    public InvoiceViewModel(IBluetoothPrinterService printerService, InvoiceHistoryService historyService)
     {
         _printerService = printerService;
+        _historyService = historyService;
 
         // Load từ preferences
         _storeName    = AppPreferences.StoreName;
@@ -32,6 +34,7 @@ public partial class InvoiceViewModel : ObservableObject
         _fontScale    = AppPreferences.FontScale;
         _isBtCollapsed = AppPreferences.BluetoothPanelCollapsed;
         _isStoreInfoCollapsed = AppPreferences.StoreInfoPanelCollapsed;
+        _isHistoryCollapsed = AppPreferences.HistoryPanelCollapsed;
         _invoiceNumber = GenerateInvoiceNumber();
 
         // Dữ liệu mẫu nội dung
@@ -41,6 +44,9 @@ public partial class InvoiceViewModel : ObservableObject
         // Tự động kết nối thiết bị lần trước (background)
         _autoReconnectCts = new CancellationTokenSource();
         _autoReconnectTask = AutoReconnectAsync(_autoReconnectCts.Token);
+
+        // Nạp lịch sử hóa đơn (cục bộ trước, đồng bộ cloud sau)
+        _ = LoadHistoryAsync();
     }
 
     // ─── Bluetooth ────────────────────────────────────────────────────────────
@@ -138,6 +144,113 @@ public partial class InvoiceViewModel : ObservableObject
 
     [RelayCommand]
     private void ToggleStoreInfoPanel() => IsStoreInfoCollapsed = !IsStoreInfoCollapsed;
+
+    // ─── Lịch sử hóa đơn ──────────────────────────────────────────────────────
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasHistory))]
+    private ObservableCollection<InvoiceRecord> _invoiceHistory = [];
+
+    [ObservableProperty] private bool   _isHistoryBusy;
+    [ObservableProperty] private string _historyStatus = "";
+
+    public bool HasHistory => InvoiceHistory.Count > 0;
+
+    private bool _isHistoryCollapsed;
+    public bool IsHistoryCollapsed
+    {
+        get => _isHistoryCollapsed;
+        set
+        {
+            if (_isHistoryCollapsed == value) return;
+            _isHistoryCollapsed = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(HistoryArrow));
+            OnPropertyChanged(nameof(IsHistoryExpanded));
+            AppPreferences.HistoryPanelCollapsed = value;
+        }
+    }
+    public bool IsHistoryExpanded => !_isHistoryCollapsed;
+    public string HistoryArrow    => _isHistoryCollapsed ? "▶" : "▼";
+
+    [RelayCommand]
+    private void ToggleHistoryPanel() => IsHistoryCollapsed = !IsHistoryCollapsed;
+
+    [RelayCommand]
+    private async Task LoadHistoryAsync()
+    {
+        if (IsHistoryBusy) return;
+        IsHistoryBusy = true;
+
+        try
+        {
+            var records = await _historyService.GetHistoryAsync();
+
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                InvoiceHistory = [.. records];
+                OnPropertyChanged(nameof(HasHistory));
+
+                int pending = records.Count(r => !r.Synced);
+                HistoryStatus = !_historyService.IsCloudEnabled
+                    ? "⚠ Chưa cấu hình Firebase — chỉ lưu trong máy"
+                    : pending > 0
+                        ? $"{records.Count} hóa đơn · {pending} chờ đồng bộ"
+                        : $"{records.Count} hóa đơn · đã đồng bộ";
+            });
+        }
+        catch (Exception ex)
+        {
+            await MainThread.InvokeOnMainThreadAsync(() =>
+                HistoryStatus = $"✗ Không tải được lịch sử: {ex.Message}");
+        }
+        finally
+        {
+            // Phải về main thread: sau await ta đang ở thread nền, mà đây là
+            // property có binding — cập nhật off-thread sẽ crash trên iOS
+            await MainThread.InvokeOnMainThreadAsync(() => IsHistoryBusy = false);
+        }
+    }
+
+    [RelayCommand]
+    private async Task ClearHistoryAsync()
+    {
+        await _historyService.ClearLocalAsync();
+        await MainThread.InvokeOnMainThreadAsync(() =>
+        {
+            InvoiceHistory.Clear();
+            OnPropertyChanged(nameof(HasHistory));
+            HistoryStatus = "Đã xóa lịch sử trong máy (dữ liệu trên Firebase vẫn còn)";
+        });
+    }
+
+    /// <summary>Ghi lại hóa đơn vừa in — gọi sau khi PrintAsync trả về thành công.</summary>
+    private async Task SaveToHistoryAsync()
+    {
+        var record = new InvoiceRecord
+        {
+            InvoiceNumber = InvoiceNumber,
+            StoreName     = StoreName,
+            Cashier       = Cashier,
+            CreatedAt     = DateTime.Now,
+            Total         = GrandTotal,
+            Note          = Note,
+            Lines         = [.. PreviewLines.Select(l => new InvoiceLine { Name = l.Name, Price = l.Price })]
+        };
+
+        bool pushed = await _historyService.AddAsync(record);
+
+        await MainThread.InvokeOnMainThreadAsync(() =>
+        {
+            InvoiceHistory.Insert(0, record);
+            OnPropertyChanged(nameof(HasHistory));
+            HistoryStatus = pushed
+                ? "✓ Đã lưu lên Firebase"
+                : _historyService.IsCloudEnabled
+                    ? "⏳ Đã lưu trong máy — sẽ đồng bộ khi có mạng"
+                    : "Đã lưu trong máy (chưa cấu hình Firebase)";
+        });
+    }
 
     [ObservableProperty] private string _storeName;
     [ObservableProperty] private string _storeAddress;
@@ -353,6 +466,9 @@ public partial class InvoiceViewModel : ObservableObject
 
             if (ok)
             {
+                // Ghi vào lịch sử TRƯỚC khi đổi số hóa đơn, để lưu đúng số vừa in
+                await SaveToHistoryAsync();
+
                 // Lưu preferences sau khi in thành công
                 SavePreferences();
                 InvoiceNumber = GenerateInvoiceNumber();

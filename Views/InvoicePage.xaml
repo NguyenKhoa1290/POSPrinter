@@ -494,6 +494,123 @@
                     </VerticalStackLayout>
                 </Border>
 
+                <!-- ══ 6. LỊCH SỬ HÓA ĐƠN ĐÃ IN ══════════════════════ -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="10">
+
+                        <!-- Header có nút thu gọn -->
+                        <Grid ColumnDefinitions="*,36,36" ColumnSpacing="8">
+                            <Label Grid.Column="0"
+                                   Text="LỊCH SỬ HÓA ĐƠN"
+                                   Style="{StaticResource SectionLabel}"
+                                   Margin="0" VerticalOptions="Center" />
+
+                            <Border Grid.Column="1"
+                                    BackgroundColor="{StaticResource BgInput}"
+                                    StrokeThickness="1" Stroke="{StaticResource BorderNorm}"
+                                    StrokeShape="RoundRectangle 8"
+                                    HeightRequest="32" WidthRequest="36">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding LoadHistoryCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="⟳"
+                                       TextColor="{StaticResource Accent}"
+                                       FontSize="14" FontAttributes="Bold"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+
+                            <Border Grid.Column="2"
+                                    BackgroundColor="{StaticResource BgInput}"
+                                    StrokeThickness="1" Stroke="{StaticResource BorderNorm}"
+                                    StrokeShape="RoundRectangle 8"
+                                    HeightRequest="32" WidthRequest="36">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleHistoryPanelCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="{Binding HistoryArrow}"
+                                       TextColor="{StaticResource Accent}"
+                                       FontSize="14" FontAttributes="Bold"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                        </Grid>
+
+                        <!-- Nội dung có thể thu gọn -->
+                        <VerticalStackLayout IsVisible="{Binding IsHistoryExpanded}" Spacing="10">
+
+                            <ActivityIndicator IsVisible="{Binding IsHistoryBusy}"
+                                               IsRunning="{Binding IsHistoryBusy}"
+                                               Color="{StaticResource Accent}" HeightRequest="24" />
+
+                            <Label Text="Chưa có hóa đơn nào được in."
+                                   TextColor="{StaticResource TextSub}"
+                                   FontSize="12" HorizontalTextAlignment="Center"
+                                   Margin="0,16"
+                                   IsVisible="{Binding HasHistory, Converter={StaticResource InverseBool}}" />
+
+                            <!-- BindableLayout thay cho CollectionView: không ảo hóa nên
+                                 an toàn khi nằm trong vùng thu gọn, và cuộn chung với trang -->
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding InvoiceHistory}"
+                                                 Spacing="8">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="model:InvoiceRecord">
+                                        <Border BackgroundColor="{StaticResource BgInputAlt}"
+                                                StrokeThickness="1" Stroke="{StaticResource BorderNorm}"
+                                                StrokeShape="RoundRectangle 10" Padding="12,10">
+                                            <VerticalStackLayout Spacing="3">
+
+                                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                    <Label Grid.Column="0"
+                                                           Text="{Binding InvoiceNumber}"
+                                                           TextColor="{StaticResource TextMain}"
+                                                           FontSize="13" FontAttributes="Bold"
+                                                           LineBreakMode="TailTruncation" />
+                                                    <Label Grid.Column="1"
+                                                           Text="{Binding TotalText}"
+                                                           TextColor="{StaticResource Accent}"
+                                                           FontSize="13" FontAttributes="Bold" />
+                                                </Grid>
+
+                                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+                                                    <Label Grid.Column="0"
+                                                           Text="{Binding SyncIcon}"
+                                                           TextColor="{Binding SyncColor, Converter={StaticResource StringToColor}}"
+                                                           FontSize="11" VerticalOptions="Center" />
+                                                    <Label Grid.Column="1"
+                                                           Text="{Binding CreatedAtText}"
+                                                           TextColor="{StaticResource TextSub}"
+                                                           FontSize="11" VerticalOptions="Center" />
+                                                    <Label Grid.Column="2"
+                                                           Text="{Binding Cashier}"
+                                                           TextColor="{StaticResource TextSub}"
+                                                           FontSize="11" VerticalOptions="Center"
+                                                           LineBreakMode="TailTruncation" />
+                                                </Grid>
+
+                                                <Label Text="{Binding ItemCountText}"
+                                                       TextColor="{StaticResource TextSub}"
+                                                       FontSize="10" LineBreakMode="TailTruncation" />
+                                            </VerticalStackLayout>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+
+                            <Border BackgroundColor="{StaticResource BgInput}"
+                                    StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="10,6">
+                                <Label Text="{Binding HistoryStatus}"
+                                       TextColor="{StaticResource TextSub}"
+                                       FontSize="12" HorizontalTextAlignment="Center" />
+                            </Border>
+
+                            <Button Text="🗑  Xóa lịch sử trong máy"
+                                    Command="{Binding ClearHistoryCommand}"
+                                    Style="{StaticResource BtnOutline}"
+                                    IsVisible="{Binding HasHistory}" />
+
+                        </VerticalStackLayout><!-- /IsHistoryExpanded -->
+                    </VerticalStackLayout>
+                </Border>
+
                 <BoxView HeightRequest="20" />
             </VerticalStackLayout>
         </ScrollView>
