@@ -78,13 +78,44 @@ public partial class InvoiceViewModel : ObservableObject
             OnPropertyChanged(nameof(BtArrow));
             OnPropertyChanged(nameof(IsBtExpanded));
             AppPreferences.BluetoothPanelCollapsed = value;
+
+            // Panel vừa mở → CollectionView đã hiển thị, giờ mới an toàn để đổ dữ liệu
+            if (!value && _pendingListDevice is { } pending)
+            {
+                _pendingListDevice = null;
+                ShowDeviceInList(pending);
+            }
         }
     }
     public bool IsBtExpanded => !_isBtCollapsed;
     public string BtArrow    => _isBtCollapsed ? "▶" : "▼";
 
+    /// <summary>
+    /// Thiết bị đã kết nối nhưng chưa đưa được vào CollectionView vì panel đang thu gọn.
+    /// Sẽ được đổ vào danh sách ngay khi người dùng mở panel ra.
+    /// </summary>
+    private BluetoothDevice? _pendingListDevice;
+
     [RelayCommand]
     private void ToggleBtPanel() => IsBtCollapsed = !IsBtCollapsed;
+
+    /// <summary>
+    /// Đưa thiết bị vào danh sách và chọn nó — CHỈ khi panel đang mở.
+    /// Nếu panel đang thu gọn thì giữ lại, tránh thao tác lên CollectionView
+    /// chưa realize (selection bị đẩy về null, danh sách hỏng khi mở ra).
+    /// </summary>
+    private void ShowDeviceInList(BluetoothDevice device)
+    {
+        if (IsBtCollapsed)
+        {
+            _pendingListDevice = device;
+            return;
+        }
+
+        if (!DiscoveredDevices.Any(d => d.Address == device.Address))
+            DiscoveredDevices.Add(device);
+        SelectedDevice = device;
+    }
 
     // ─── Store info panel collapse ────────────────────────────────────────────
 
@@ -406,14 +437,9 @@ public partial class InvoiceViewModel : ObservableObject
 
             if (target is { } device)
             {
-                // Cập nhật UI trên main thread
-                await MainThread.InvokeOnMainThreadAsync(() =>
-                {
-                    if (!DiscoveredDevices.Any(d => d.Address == device.Address))
-                        DiscoveredDevices.Add(device);
-                    SelectedDevice = device;
-                });
-
+                // Kết nối TRƯỚC, đụng vào UI sau. CollectionView danh sách thiết bị
+                // nằm trong vùng IsBtExpanded — ghi vào nó khi panel đang thu gọn
+                // là thao tác lên control chưa realize, sẽ hỏng khi mở panel ra.
                 bool ok = await _printerService.ConnectAsync(device);
 
                 if (ok)
@@ -429,7 +455,8 @@ public partial class InvoiceViewModel : ObservableObject
                     StatusMessage = ok
                         ? $"✓ Tự động kết nối {lastName}"
                         : "Không thể kết nối lại — thử thủ công";
-                    if (ok) IsBtCollapsed = true;
+
+                    if (ok) ShowDeviceInList(device);
                 });
             }
             else
