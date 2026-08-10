@@ -6,6 +6,18 @@ Nghe thì đơn giản — gõ vài dòng chữ rồi bắn sang máy in. Thực
 
 ---
 
+## Nhìn thử
+
+![Windows, iPhone và Android cùng chạy một bản POS Printer](Introduced%20image/photo_2026-08-10_16-56-18.jpg)
+
+Một codebase, ba máy, không có dòng giao diện nào viết riêng cho nền tảng nào. Bên trái là bản Windows đang chạy debug trong Visual Studio, giữa là iPhone, phải là Android — hai máy sau đều đã bắt được máy in `RPP02N` (chấm xanh ở góc trên), còn bản Windows thì chưa kết nối nên khung Bluetooth vẫn mở sẵn chờ quét.
+
+Ảnh cũng cho thấy mấy chi tiết mà phần dưới sẽ nói kỹ: khung thu gọn được và **mỗi máy nhớ trạng thái riêng** (Android đang mở THÔNG TIN CỬA HÀNG, iPhone thì đóng), ô nhập hóa đơn hai cột tên/giá, và mục ENCODING MÁY IN dành cho lúc chữ tiếng Việt in ra bị loạn.
+
+**[Video demo thao tác trong app](Introduced%20image/video_2026-08-10_16-57-11.mp4)** *(mp4, ~20 MB — bấm để tải về xem)*
+
+---
+
 ## Ba câu chuyện đằng sau codebase
 
 ### 1. Cùng một máy in, hai giao thức hoàn toàn khác nhau
@@ -136,7 +148,9 @@ Bản iOS được GitHub Actions build tự động mỗi lần push lên `main
 | `0000FF00…` | iDPRT, GOOJPRT |
 | `0000FFF0…` | biến thể khác |
 
-Không khớp cái nào cũng không sao — app quét toàn bộ service rồi lấy characteristic đầu tiên ghi được. Đã thử với Xprinter XP-58BH, GOOJPRT PT-210, iDPRT SP410.
+Không khớp cái nào cũng không sao — app quét toàn bộ service rồi lấy characteristic đầu tiên ghi được.
+
+Máy đã chạy thật: **RPP02N** (xem ảnh đầu trang, kết nối được trên cả iOS lẫn Android). Ngoài ra còn Xprinter XP-58BH, GOOJPRT PT-210, iDPRT SP410.
 
 ## Khi có trục trặc
 

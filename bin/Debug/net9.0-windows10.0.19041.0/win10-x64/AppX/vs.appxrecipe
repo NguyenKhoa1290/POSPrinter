@@ -9,7 +9,7 @@
     <SolutionConfiguration>Debug|AnyCPU</SolutionConfiguration>
     <PackageArchitecture>x64</PackageArchitecture>
     <PackageIdentityName>com.companyname.posprinter</PackageIdentityName>
-    <PackageIdentityPublisher>CN=User Name</PackageIdentityPublisher>
+    <PackageIdentityPublisher>CN=NguyenKhoa</PackageIdentityPublisher>
     <IntermediateOutputPath>D:\QRCode\POSPrinter\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\</IntermediateOutputPath>
     <RemoteDeploymentType>CopyToDevice</RemoteDeploymentType>
     <PackageRegistrationPath></PackageRegistrationPath>
@@ -17,36 +17,36 @@
     <DeployOptionalPackages>false</DeployOptionalPackages>
     <WindowsSdkPath>D:\Windows Kits\10\</WindowsSdkPath>
     <LayoutDir>D:\QRCode\POSPrinter\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\AppX</LayoutDir>
-    <RegisteredManifestChecksum>D7F6D21B45C9F674439461046DC7FF39E4BABBF5CF7E06960AB30FE8106D1EFE</RegisteredManifestChecksum>
-    <RegisteredPackageMoniker>com.companyname.posprinter_1.0.0.1_x64__9zz4h110yvjzm</RegisteredPackageMoniker>
-    <RegisteredUserModeAppID>com.companyname.posprinter_9zz4h110yvjzm!App</RegisteredUserModeAppID>
+    <RegisteredManifestChecksum>3CAE06204F61B1419E92CE024E5C7A62BD58FD7FE2CEDF2DD48D927059638BB1</RegisteredManifestChecksum>
+    <RegisteredPackageMoniker>com.companyname.posprinter_22.1.1.0_x64__9vexm6v64yjn4</RegisteredPackageMoniker>
+    <RegisteredUserModeAppID>com.companyname.posprinter_9vexm6v64yjn4!App</RegisteredUserModeAppID>
     <RegisteredPackageID>com.companyname.posprinter</RegisteredPackageID>
-    <RegisteredPackagePublisher>CN=User Name</RegisteredPackagePublisher>
-    <RegisteredVersion>1.0.0.1</RegisteredVersion>
+    <RegisteredPackagePublisher>CN=NguyenKhoa</RegisteredPackagePublisher>
+    <RegisteredVersion>22.1.1.0</RegisteredVersion>
   </PropertyGroup>
   <ItemGroup>
     <AppXManifest Include="D:\QRCode\POSPrinter\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2026-08-10T09:10:48.089</Modified>
+      <Modified>2026-08-10T09:50:48.168</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="D:\QRCode\POSPrinter\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\resources.pri">
       <PackagePath>resources.pri</PackagePath>
-      <Modified>2026-08-10T09:10:47.826</Modified>
+      <Modified>2026-08-10T09:50:47.926</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="D:\QRCode\POSPrinter\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\POSPrinter.runtimeconfig.json">
       <PackagePath>POSPrinter.runtimeconfig.json</PackagePath>
-      <Modified>2026-08-10T09:10:47.578</Modified>
+      <Modified>2026-08-10T09:50:47.702</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="D:\QRCode\POSPrinter\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\POSPrinter.dll">
       <PackagePath>POSPrinter.dll</PackagePath>
-      <Modified>2026-08-10T09:10:46.109</Modified>
+      <Modified>2026-08-10T09:50:46.477</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="D:\QRCode\POSPrinter\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\apphost.exe">
       <PackagePath>POSPrinter.exe</PackagePath>
-      <Modified>2026-08-10T09:10:46.128</Modified>
+      <Modified>2026-08-10T09:50:46.495</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="D:\QRCode\POSPrinter\Resources\Raw\AboutAssets.txt">
       <PackagePath>AboutAssets.txt</PackagePath>
@@ -678,7 +678,7 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="D:\QRCode\POSPrinter\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\POSPrinter.deps.json">
       <PackagePath>POSPrinter.deps.json</PackagePath>
-      <Modified>2026-08-10T09:10:47.539</Modified>
+      <Modified>2026-08-10T09:50:47.682</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\NguyenKhoa\.nuget\packages\microsoft.maui.controls.core\9.0.120\lib\net9.0-windows10.0.19041\Microsoft.Maui.Controls.pri">
       <PackagePath>Microsoft.Maui.Controls.pri</PackagePath>

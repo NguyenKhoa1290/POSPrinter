@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "W6aqCjDd7Gc=",
+  "dgSpecHash": "NPk4gm7TIl4=",
   "success": true,
   "projectFilePath": "D:\\QRCode\\POSPrinter\\POSPrinter.csproj",
   "expectedPackageFiles": [
@@ -141,11 +141,7 @@
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.android.runtime.35.android-arm64\\35.0.105\\microsoft.android.runtime.35.android-arm64.35.0.105.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.android.runtime.35.android-x64\\35.0.105\\microsoft.android.runtime.35.android-x64.35.0.105.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.android.ref.35\\35.0.105\\microsoft.android.ref.35.35.0.105.nupkg.sha512",
-    "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.netcore.app.crossgen2.win-x64\\9.0.17\\microsoft.netcore.app.crossgen2.win-x64.9.0.17.nupkg.sha512",
-    "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.19041.57\\microsoft.windows.sdk.net.ref.10.0.19041.57.nupkg.sha512",
-    "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\9.0.17\\microsoft.aspnetcore.app.runtime.win-x64.9.0.17.nupkg.sha512",
-    "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\9.0.17\\microsoft.windowsdesktop.app.runtime.win-x64.9.0.17.nupkg.sha512",
-    "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\9.0.17\\microsoft.netcore.app.runtime.win-x64.9.0.17.nupkg.sha512"
+    "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.19041.57\\microsoft.windows.sdk.net.ref.10.0.19041.57.nupkg.sha512"
   ],
   "logs": []
 }

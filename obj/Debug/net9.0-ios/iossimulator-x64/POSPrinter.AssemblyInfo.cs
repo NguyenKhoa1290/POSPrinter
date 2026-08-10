@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("POSPrinter")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+b408a28e89a075719ba24cf5d486d82a493b6d2e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+82981a5bcbb4742618138c651116d809e5a52f78")]
 [assembly: System.Reflection.AssemblyProductAttribute("POSPrinter")]
 [assembly: System.Reflection.AssemblyTitleAttribute("POSPrinter")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
