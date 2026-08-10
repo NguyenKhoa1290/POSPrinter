@@ -255,6 +255,14 @@ public partial class InvoiceViewModel : ObservableObject
         bool ok = await _printerService.ConnectAsync(SelectedDevice);
         IsDeviceConnected = ok;
         StatusMessage = ok ? $"✓ Đã kết nối {SelectedDevice.Name}" : "✗ Kết nối thất bại";
+
+        if (ok && SelectedDevice != null)
+        {
+            // Lưu ngay khi kết nối thành công → auto-reconnect lần sau
+            AppPreferences.LastDeviceAddress = SelectedDevice.Address;
+            AppPreferences.LastDeviceName    = SelectedDevice.Name;
+        }
+
         IsBusy = false;
     }
 
