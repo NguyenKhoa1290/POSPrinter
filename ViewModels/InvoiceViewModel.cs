@@ -440,7 +440,17 @@ public partial class InvoiceViewModel : ObservableObject
     private async Task PrintInvoiceAsync()
     {
         if (_printerService == null) { StatusMessage = "⚠ Dịch vụ Bluetooth chưa sẵn sàng!"; return; }
-        if (!IsConnected) { StatusMessage = "⚠ Chưa kết nối máy in!"; return; }
+
+        // Kết nối có thể đã rớt lúc app xuống nền — thử nối lại trước khi bỏ cuộc
+        if (!IsConnected)
+        {
+            IsBusy = true;
+            StatusMessage = "Máy in đã ngắt — đang kết nối lại...";
+            bool reconnected = await EnsureConnectedAsync();
+            IsBusy = false;
+
+            if (!reconnected) { StatusMessage = "⚠ Chưa kết nối máy in!"; return; }
+        }
 
         var lines = PreviewLines;
         if (lines.Count == 0) { StatusMessage = "⚠ Chưa có nội dung để in!"; return; }
@@ -462,7 +472,18 @@ public partial class InvoiceViewModel : ObservableObject
                 fontScale     : FontScale);
 
             bool ok = await _printerService.PrintAsync(data);
-            StatusMessage = ok ? "✓ In thành công!" : "✗ Lỗi khi gửi đến máy in";
+            StatusMessage = ok ? "✓ In thành công!" : "✗ Lỗi khi gửi đến máy in — bấm In lần nữa để thử lại";
+
+            if (!ok)
+            {
+                // Socket/peripheral đã chết nhưng trạng thái còn cũ. Dọn sạch để
+                // lần bấm In kế tiếp đi qua nhánh kết nối lại.
+                // Không tự động in lại ngay: dữ liệu có thể đã ra máy một phần,
+                // in lại tự động sẽ ra hóa đơn trùng.
+                await _printerService.DisconnectAsync();
+                IsDeviceConnected = false;
+                RefreshConnectionState();
+            }
 
             if (ok)
             {
@@ -489,6 +510,63 @@ public partial class InvoiceViewModel : ObservableObject
 
     // ─── Auto-reconnect ──────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Gọi mỗi khi app quay lại foreground. Về màn hình chính là hệ điều hành
+    /// ngắt kết nối máy in, mà auto-reconnect thì chỉ chạy một lần lúc khởi tạo
+    /// → không có cái này thì lần in kế tiếp bị chặn vì "chưa kết nối".
+    /// </summary>
+    public async Task OnResumeAsync()
+    {
+        RefreshConnectionState();
+        await EnsureConnectedAsync();
+
+        // Tiện thể đẩy nốt hóa đơn còn nằm chờ trong máy
+        _ = LoadHistoryAsync();
+    }
+
+    /// <summary>Đồng bộ cờ trong VM với trạng thái thật của dịch vụ Bluetooth.</summary>
+    private void RefreshConnectionState()
+    {
+        bool live = _printerService?.ConnectedDevice != null;
+        if (IsDeviceConnected != live)
+        {
+            IsDeviceConnected = live;
+        }
+        else
+        {
+            // Giá trị không đổi nhưng ConnectedDevice có thể đã đổi → ép cập nhật UI
+            OnPropertyChanged(nameof(IsConnected));
+            OnPropertyChanged(nameof(ConnectionStatusText));
+            OnPropertyChanged(nameof(ConnectionStatusColor));
+        }
+    }
+
+    /// <summary>
+    /// Đảm bảo đang kết nối máy in — nếu rớt thì nối lại thiết bị đã lưu.
+    /// Trả về true nếu cuối cùng đang có kết nối.
+    /// </summary>
+    private async Task<bool> EnsureConnectedAsync()
+    {
+        if (_printerService == null) return false;
+
+        if (_printerService.ConnectedDevice != null)
+        {
+            RefreshConnectionState();
+            return true;
+        }
+
+        if (string.IsNullOrEmpty(AppPreferences.LastDeviceAddress)) return false;
+
+        // Chạy lại đúng luồng auto-reconnect, bỏ qua 2.5s chờ khởi động
+        await CancelAutoReconnectAsync();
+        _autoReconnectCts  = new CancellationTokenSource();
+        _autoReconnectTask = AutoReconnectAsync(_autoReconnectCts.Token, immediate: true);
+
+        try { await _autoReconnectTask; } catch { /* đã huỷ */ }
+
+        return _printerService.ConnectedDevice != null;
+    }
+
     /// <summary>Huỷ auto-reconnect và đợi nó nhả sóng Bluetooth ra hẳn.</summary>
     private async Task CancelAutoReconnectAsync()
     {
@@ -502,14 +580,18 @@ public partial class InvoiceViewModel : ObservableObject
         _autoReconnectTask = null;
     }
 
-    private async Task AutoReconnectAsync(CancellationToken cancellationToken)
+    /// <param name="immediate">
+    /// true khi gọi lúc app quay lại foreground — BLE stack đã sẵn sàng từ trước,
+    /// không cần chờ khởi động.
+    /// </param>
+    private async Task AutoReconnectAsync(CancellationToken cancellationToken, bool immediate = false)
     {
         string lastAddr = AppPreferences.LastDeviceAddress;
         string lastName = AppPreferences.LastDeviceName;
         if (string.IsNullOrEmpty(lastAddr) || _printerService == null) return;
 
         // Chờ app + BLE stack khởi động hoàn tất (iOS cần lâu hơn Android)
-        await Task.Delay(2500, cancellationToken);
+        if (!immediate) await Task.Delay(2500, cancellationToken);
 
         try
         {

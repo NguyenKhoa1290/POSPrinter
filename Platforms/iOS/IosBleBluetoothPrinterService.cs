@@ -196,6 +196,15 @@ public class IosBleBluetoothPrinterService : NSObject, IBluetoothPrinterService,
         if (_connectedPeripheral == null || _writeCharacteristic == null)
             return false;
 
+        // Sau khi app xuống nền, peripheral có thể đã ngắt mà tham chiếu vẫn còn.
+        // Không kiểm tra thì WriteValue im lặng trôi đi và app báo "in thành công".
+        if (_connectedPeripheral.State != CBPeripheralState.Connected)
+        {
+            _connectedDevice = null;
+            _writeCharacteristic = null;
+            return false;
+        }
+
         // Chỉ dùng WithoutResponse khi characteristic thực sự hỗ trợ,
         // ngược lại iOS sẽ âm thầm bỏ qua dữ liệu.
         var writeType = _writeCharacteristic.Properties.HasFlag(CBCharacteristicProperties.WriteWithoutResponse)
