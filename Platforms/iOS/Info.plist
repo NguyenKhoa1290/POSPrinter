@@ -35,6 +35,12 @@
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Ứng dụng cần Bluetooth để kết nối máy in nhiệt POS.</string>
 
+	<!-- Giữ kết nối BLE khi app xuống nền → mở lại không phải kết nối thủ công -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>bluetooth-central</string>
+	</array>
+
 	<!-- UI style -->
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleLightContent</string>

@@ -52,30 +52,81 @@ public class IosBleBluetoothPrinterService : NSObject, IBluetoothPrinterService,
     private TaskCompletionSource<bool>? _connectTcs;
     private bool _isScanning;
 
+    /// <summary>Hoàn tất khi CBCentralManager đạt trạng thái PoweredOn.</summary>
+    private TaskCompletionSource<bool>? _poweredOnTcs;
+
     // ─── IBluetoothPrinterService ─────────────────────────────────────────────
 
     public bool IsBluetoothEnabled => _centralManager?.State == CBManagerState.PoweredOn;
     public BluetoothDevice? ConnectedDevice => _connectedDevice;
     public bool IsScanning => _isScanning;
 
-    public Task StartScanAsync(Action<BluetoothDevice> onDeviceFound, CancellationToken cancellationToken = default)
+    public async Task StartScanAsync(Action<BluetoothDevice> onDeviceFound, CancellationToken cancellationToken = default)
     {
         _onDeviceFound = onDeviceFound;
         _discoveredAddresses.Clear();
 
-        if (_centralManager == null)
+        cancellationToken.Register(() => _ = StopScanAsync());
+
+        // CBCentralManager vừa tạo luôn ở trạng thái Unknown — phải chờ
+        // delegate UpdatedState báo PoweredOn mới quét được.
+        if (!await EnsureManagerReadyAsync(cancellationToken))
+            return;
+
+        if (!cancellationToken.IsCancellationRequested)
+            StartScanInternal();
+    }
+
+    /// <summary>
+    /// iOS không có khái niệm "paired device" như Android. Thay vào đó CoreBluetooth
+    /// cho phép lấy lại peripheral đã từng kết nối bằng UUID đã lưu — nhanh và
+    /// chắc chắn hơn quét, vì máy in có thể không advertise liên tục.
+    /// </summary>
+    public async Task<BluetoothDevice?> TryGetKnownDeviceAsync(string address)
+    {
+        if (string.IsNullOrWhiteSpace(address)) return null;
+        if (!await EnsureManagerReadyAsync(CancellationToken.None)) return null;
+
+        // Địa chỉ cũ có thể không phải UUID (vd. MAC lưu từ bản Android)
+        if (!Guid.TryParse(address, out var guid)) return null;
+        var uuid = new NSUuid(guid.ToString());
+
+        // 1) Peripheral đã từng biết đến
+        var known = _centralManager!.RetrievePeripheralsWithIdentifiers(uuid);
+        var peripheral = known?.FirstOrDefault();
+
+        // 2) Hoặc peripheral đang được hệ thống kết nối sẵn
+        if (peripheral == null)
         {
-            _centralManager = new CBCentralManager(this, null);
+            var connected = _centralManager.RetrieveConnectedPeripherals(PrinterServiceUUIDs);
+            peripheral = connected?.FirstOrDefault(p => p.Identifier.AsString() == uuid.AsString());
         }
+
+        if (peripheral == null) return null;
+
+        return new BluetoothDevice
+        {
+            Name = peripheral.Name ?? "Printer",
+            Address = peripheral.Identifier.ToString(),
+            NativeDevice = peripheral
+        };
+    }
+
+    /// <summary>Tạo CBCentralManager (nếu chưa có) và chờ tới khi PoweredOn.</summary>
+    private async Task<bool> EnsureManagerReadyAsync(CancellationToken cancellationToken)
+    {
+        _centralManager ??= new CBCentralManager(this, null);
 
         if (_centralManager.State == CBManagerState.PoweredOn)
-        {
-            StartScanInternal();
-        }
-        // Nếu chưa PoweredOn thì UpdatedState sẽ gọi StartScanInternal
+            return true;
 
-        cancellationToken.Register(() => _ = StopScanAsync());
-        return Task.CompletedTask;
+        var tcs = _poweredOnTcs ??= new TaskCompletionSource<bool>();
+
+        // Chờ tối đa 10s: người dùng có thể đang bật Bluetooth / cấp quyền
+        var timeout = Task.Delay(10_000, cancellationToken);
+        var completed = await Task.WhenAny(tcs.Task, timeout);
+
+        return completed == tcs.Task && _centralManager.State == CBManagerState.PoweredOn;
     }
 
     public Task StopScanAsync()
@@ -87,18 +138,22 @@ public class IosBleBluetoothPrinterService : NSObject, IBluetoothPrinterService,
 
     public async Task<bool> ConnectAsync(BluetoothDevice device)
     {
-        if (_centralManager == null || device.NativeDevice is not CBPeripheral peripheral)
+        if (device.NativeDevice is not CBPeripheral peripheral)
+            return false;
+
+        if (!await EnsureManagerReadyAsync(CancellationToken.None))
             return false;
 
         await StopScanAsync();
 
         _connectTcs = new TaskCompletionSource<bool>();
+        _writeCharacteristic = null;
         _connectedPeripheral = peripheral;
         _connectedPeripheral.Delegate = this;
-        _centralManager.ConnectPeripheral(peripheral);
+        _centralManager!.ConnectPeripheral(peripheral);
 
-        // Timeout 10 giây
-        var timeout = Task.Delay(10_000);
+        // Timeout 15 giây (peripheral lấy lại từ bộ nhớ có thể cần đánh thức)
+        var timeout = Task.Delay(15_000);
         var completed = await Task.WhenAny(_connectTcs.Task, timeout);
 
         if (completed == timeout)
@@ -128,6 +183,12 @@ public class IosBleBluetoothPrinterService : NSObject, IBluetoothPrinterService,
         if (_connectedPeripheral == null || _writeCharacteristic == null)
             return false;
 
+        // Chỉ dùng WithoutResponse khi characteristic thực sự hỗ trợ,
+        // ngược lại iOS sẽ âm thầm bỏ qua dữ liệu.
+        var writeType = _writeCharacteristic.Properties.HasFlag(CBCharacteristicProperties.WriteWithoutResponse)
+            ? CBCharacteristicWriteType.WithoutResponse
+            : CBCharacteristicWriteType.WithResponse;
+
         // Chia nhỏ dữ liệu thành chunk 20 bytes (MTU mặc định BLE)
         const int chunkSize = 20;
         for (int offset = 0; offset < data.Length; offset += chunkSize)
@@ -137,7 +198,7 @@ public class IosBleBluetoothPrinterService : NSObject, IBluetoothPrinterService,
             Array.Copy(data, offset, chunk, 0, length);
 
             var nsData = NSData.FromArray(chunk);
-            _connectedPeripheral.WriteValue(nsData, _writeCharacteristic, CBCharacteristicWriteType.WithoutResponse);
+            _connectedPeripheral.WriteValue(nsData, _writeCharacteristic, writeType);
 
             // Delay nhỏ để tránh overrun bộ đệm BLE
             await Task.Delay(10);
@@ -151,9 +212,15 @@ public class IosBleBluetoothPrinterService : NSObject, IBluetoothPrinterService,
     [Export("centralManagerDidUpdateState:")]
     public void UpdatedState(CBCentralManager central)
     {
-        if (central.State == CBManagerState.PoweredOn && _onDeviceFound != null)
+        if (central.State == CBManagerState.PoweredOn)
         {
-            StartScanInternal();
+            _poweredOnTcs?.TrySetResult(true);
+        }
+        else
+        {
+            // Bluetooth tắt / mất quyền → reset để lần sau chờ lại
+            _poweredOnTcs = null;
+            _isScanning = false;
         }
     }
 
@@ -179,8 +246,10 @@ public class IosBleBluetoothPrinterService : NSObject, IBluetoothPrinterService,
     [Export("centralManager:didConnectPeripheral:")]
     public void ConnectedPeripheral(CBCentralManager central, CBPeripheral peripheral)
     {
-        // Sau khi kết nối, khám phá services
-        peripheral.DiscoverServices(PrinterServiceUUIDs);
+        // Khám phá TẤT CẢ service: nhiều máy in dùng UUID ngoài danh sách phổ biến,
+        // lọc sẵn theo PrinterServiceUUIDs sẽ khiến kết nối treo tới khi timeout.
+        peripheral.Delegate = this;
+        peripheral.DiscoverServices();
     }
 
     [Export("centralManager:didFailToConnectPeripheral:error:")]
@@ -194,6 +263,9 @@ public class IosBleBluetoothPrinterService : NSObject, IBluetoothPrinterService,
     {
         _connectedDevice = null;
         _writeCharacteristic = null;
+
+        // Nếu đang chờ kết nối mà bị rớt → giải phóng ConnectAsync ngay
+        _connectTcs?.TrySetResult(false);
     }
 
     // ─── CBPeripheral Delegate ────────────────────────────────────────────────
@@ -205,7 +277,7 @@ public class IosBleBluetoothPrinterService : NSObject, IBluetoothPrinterService,
 
         foreach (var service in peripheral.Services)
         {
-            peripheral.DiscoverCharacteristics(PrinterWriteCharUUIDs, service);
+            peripheral.DiscoverCharacteristics(service);
         }
     }
 
@@ -213,32 +285,42 @@ public class IosBleBluetoothPrinterService : NSObject, IBluetoothPrinterService,
     public void DiscoveredCharacteristic(CBPeripheral peripheral, CBService service, NSError? error)
     {
         if (error != null || service.Characteristics == null) return;
+        if (_writeCharacteristic != null) return;   // đã tìm được ở service khác
+
+        // Ưu tiên characteristic nằm trong danh sách UUID máy in đã biết,
+        // sau đó mới tới bất kỳ characteristic nào ghi được.
+        CBCharacteristic? fallback = null;
 
         foreach (var characteristic in service.Characteristics)
         {
             bool isWritable = characteristic.Properties.HasFlag(CBCharacteristicProperties.Write)
                            || characteristic.Properties.HasFlag(CBCharacteristicProperties.WriteWithoutResponse);
-            if (isWritable)
+            if (!isWritable) continue;
+
+            if (PrinterWriteCharUUIDs.Any(u => u.Equals(characteristic.UUID)))
             {
-                _writeCharacteristic = characteristic;
-                _connectedDevice = new BluetoothDevice
-                {
-                    Name = peripheral.Name ?? "Printer",
-                    Address = peripheral.Identifier.ToString(),
-                    IsConnected = true,
-                    NativeDevice = peripheral
-                };
-                _connectTcs?.TrySetResult(true);
+                UseWriteCharacteristic(peripheral, characteristic);
                 return;
             }
+
+            fallback ??= characteristic;
         }
 
-        // Nếu không tìm thấy characteristic phù hợp, thử tất cả
-        if (_writeCharacteristic == null)
+        if (fallback != null)
+            UseWriteCharacteristic(peripheral, fallback);
+    }
+
+    private void UseWriteCharacteristic(CBPeripheral peripheral, CBCharacteristic characteristic)
+    {
+        _writeCharacteristic = characteristic;
+        _connectedDevice = new BluetoothDevice
         {
-            // Tìm characteristic có thể write trong bất kỳ service nào
-            peripheral.DiscoverCharacteristics(null, service);
-        }
+            Name = peripheral.Name ?? "Printer",
+            Address = peripheral.Identifier.ToString(),
+            IsConnected = true,
+            NativeDevice = peripheral
+        };
+        _connectTcs?.TrySetResult(true);
     }
 
     // ─── Private Helpers ───────────────────────────────────────────────────────

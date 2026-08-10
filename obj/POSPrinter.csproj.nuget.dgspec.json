@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\QRCode\\POSPrinter\\POSPrinter.csproj": {}
+    "d:\\QRCode\\POSPrinter\\POSPrinter.csproj": {}
   },
   "projects": {
-    "D:\\QRCode\\POSPrinter\\POSPrinter.csproj": {
+    "d:\\QRCode\\POSPrinter\\POSPrinter.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\QRCode\\POSPrinter\\POSPrinter.csproj",
+        "projectUniqueName": "d:\\QRCode\\POSPrinter\\POSPrinter.csproj",
         "projectName": "POSPrinter",
-        "projectPath": "D:\\QRCode\\POSPrinter\\POSPrinter.csproj",
+        "projectPath": "d:\\QRCode\\POSPrinter\\POSPrinter.csproj",
         "packagesPath": "C:\\Users\\NguyenKhoa\\.nuget\\packages\\",
-        "outputPath": "D:\\QRCode\\POSPrinter\\obj\\",
+        "outputPath": "d:\\QRCode\\POSPrinter\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "fallbackFolders": [

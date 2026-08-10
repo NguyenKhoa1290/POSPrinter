@@ -261,6 +261,8 @@ public partial class InvoiceViewModel : ObservableObject
             // Lưu ngay khi kết nối thành công → auto-reconnect lần sau
             AppPreferences.LastDeviceAddress = SelectedDevice.Address;
             AppPreferences.LastDeviceName    = SelectedDevice.Name;
+            // Thu gọn khung BT — trạng thái này được lưu lại cho lần mở app sau
+            IsBtCollapsed = true;
         }
 
         IsBusy = false;
@@ -338,29 +340,44 @@ public partial class InvoiceViewModel : ObservableObject
             await MainThread.InvokeOnMainThreadAsync(() =>
                 StatusMessage = $"Đang kết nối lại {lastName}...");
 
-            // Quét paired devices, tìm địa chỉ khớp
-            BluetoothDevice? target = null;
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(8));
+            // 1) Đường tắt: nền tảng có thể lấy lại thiết bị đã lưu mà không cần quét
+            //    (iOS/CoreBluetooth). Android/Windows trả null → rơi xuống bước quét.
+            BluetoothDevice? target = await _printerService.TryGetKnownDeviceAsync(lastAddr);
 
-            await _printerService.StartScanAsync(device =>
+            // 2) Quét tìm địa chỉ khớp.
+            //    Android trả kết quả ngay trong callback (paired devices) nên TCS
+            //    hoàn tất tức thì; iOS/BLE cần vài giây nên phải chờ thật sự thay vì
+            //    dừng quét ngay sau khi StartScanAsync trả về.
+            if (target == null)
             {
-                if (target == null && device.Address == lastAddr)
-                    target = device;
-            }, cts.Token);
+                var found = new TaskCompletionSource<BluetoothDevice>();
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(12));
 
-            await _printerService.StopScanAsync();
+                await _printerService.StartScanAsync(device =>
+                {
+                    if (device.Address == lastAddr)
+                        found.TrySetResult(device);
+                }, cts.Token);
 
-            if (target != null)
+                var completed = await Task.WhenAny(found.Task, Task.Delay(TimeSpan.FromSeconds(12)));
+
+                await _printerService.StopScanAsync();
+
+                if (completed == found.Task)
+                    target = found.Task.Result;
+            }
+
+            if (target is { } device)
             {
                 // Cập nhật UI trên main thread
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    if (!DiscoveredDevices.Any(d => d.Address == target.Address))
-                        DiscoveredDevices.Add(target);
-                    SelectedDevice = target;
+                    if (!DiscoveredDevices.Any(d => d.Address == device.Address))
+                        DiscoveredDevices.Add(device);
+                    SelectedDevice = device;
                 });
 
-                bool ok = await _printerService.ConnectAsync(target);
+                bool ok = await _printerService.ConnectAsync(device);
 
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {

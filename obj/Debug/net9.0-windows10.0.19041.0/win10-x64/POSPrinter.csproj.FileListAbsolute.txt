@@ -201,3 +201,4 @@ D:\QRCode\POSPrinter\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\qualifiers.t
 D:\QRCode\POSPrinter\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\MultipleQualifiersPerDimensionFound.txt
 D:\QRCode\POSPrinter\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\ProjectArchitectures.txt
 D:\QRCode\POSPrinter\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\.winmd_cache\$SkiaSharp.Views.WinUI.Native.winmd_638689436520000000.json
+d:\QRCode\POSPrinter\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\POSPrinter.sourcelink.json

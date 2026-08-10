@@ -20,43 +20,43 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property.EntryPointFilePath = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = POSPrinter
-build_property.ProjectDir = D:\QRCode\POSPrinter\
+build_property.ProjectDir = d:\QRCode\POSPrinter\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[D:/QRCode/POSPrinter/App.xaml]
+[d:/QRCode/POSPrinter/App.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = POSPrinter.App.xaml
 build_metadata.AdditionalFiles.TargetPath = App.xaml
 build_metadata.AdditionalFiles.RelativePath = App.xaml
 
-[D:/QRCode/POSPrinter/AppShell.xaml]
+[d:/QRCode/POSPrinter/AppShell.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = POSPrinter.AppShell.xaml
 build_metadata.AdditionalFiles.TargetPath = AppShell.xaml
 build_metadata.AdditionalFiles.RelativePath = AppShell.xaml
 
-[D:/QRCode/POSPrinter/MainPage.xaml]
+[d:/QRCode/POSPrinter/MainPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = POSPrinter.MainPage.xaml
 build_metadata.AdditionalFiles.TargetPath = MainPage.xaml
 build_metadata.AdditionalFiles.RelativePath = MainPage.xaml
 
-[D:/QRCode/POSPrinter/Resources/Styles/Colors.xaml]
+[d:/QRCode/POSPrinter/Resources/Styles/Colors.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = POSPrinter.Resources.Styles.Colors.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Colors.xaml
 build_metadata.AdditionalFiles.RelativePath = Resources\Styles\Colors.xaml
 
-[D:/QRCode/POSPrinter/Resources/Styles/Styles.xaml]
+[d:/QRCode/POSPrinter/Resources/Styles/Styles.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = POSPrinter.Resources.Styles.Styles.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Styles.xaml
 build_metadata.AdditionalFiles.RelativePath = Resources\Styles\Styles.xaml
 
-[D:/QRCode/POSPrinter/Views/InvoicePage.xaml]
+[d:/QRCode/POSPrinter/Views/InvoicePage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = POSPrinter.Views.InvoicePage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\InvoicePage.xaml

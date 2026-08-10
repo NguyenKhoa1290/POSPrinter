@@ -1,1 +1,1 @@
-D:\QRCode\POSPrinter\POSPrinter.csproj;x64
+d:\QRCode\POSPrinter\POSPrinter.csproj;x64

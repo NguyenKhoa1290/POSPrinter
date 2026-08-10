@@ -30,4 +30,12 @@ public interface IBluetoothPrinterService
 
     /// <summary>Gửi dữ liệu ESC/POS đến máy in</summary>
     Task<bool> PrintAsync(byte[] data);
+
+    /// <summary>
+    /// Thử lấy lại thiết bị đã lưu theo địa chỉ mà KHÔNG cần quét.
+    /// iOS override để dùng CoreBluetooth retrievePeripherals(withIdentifiers:).
+    /// Mặc định trả về null → Android/Windows giữ nguyên luồng quét như cũ.
+    /// </summary>
+    Task<BluetoothDevice?> TryGetKnownDeviceAsync(string address)
+        => Task.FromResult<BluetoothDevice?>(null);
 }
