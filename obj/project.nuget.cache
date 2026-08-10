@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "VJhhsH5C7dE=",
+  "dgSpecHash": "piF+CvqBEdw=",
   "success": true,
   "projectFilePath": "d:\\QRCode\\POSPrinter\\POSPrinter.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\NguyenKhoa\\.nuget\\packages\\communitytoolkit.maui\\12.3.0\\communitytoolkit.maui.12.3.0.nupkg.sha512",
+    "C:\\Users\\NguyenKhoa\\.nuget\\packages\\communitytoolkit.maui.core\\12.3.0\\communitytoolkit.maui.core.12.3.0.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\communitytoolkit.mvvm\\8.4.0\\communitytoolkit.mvvm.8.4.0.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\googlegson\\2.13.0.1\\googlegson.2.13.0.1.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.extensions.configuration\\9.0.9\\microsoft.extensions.configuration.9.0.9.nupkg.sha512",
@@ -39,6 +41,7 @@
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\skiasharp.views.maui.controls\\3.116.1\\skiasharp.views.maui.controls.3.116.1.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\skiasharp.views.maui.core\\3.116.1\\skiasharp.views.maui.core.3.116.1.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\skiasharp.views.winui\\3.116.1\\skiasharp.views.winui.3.116.1.nupkg.sha512",
+    "C:\\Users\\NguyenKhoa\\.nuget\\packages\\system.speech\\9.0.5\\system.speech.9.0.5.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\xamarin.android.glide\\4.16.0.12\\xamarin.android.glide.4.16.0.12.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\xamarin.android.glide.annotations\\4.16.0.12\\xamarin.android.glide.annotations.4.16.0.12.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\xamarin.android.glide.disklrucache\\4.16.0.12\\xamarin.android.glide.disklrucache.4.16.0.12.nupkg.sha512",
@@ -136,11 +139,11 @@
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\zxing.net\\0.16.9\\zxing.net.0.16.9.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\zxing.net.maui\\0.4.0\\zxing.net.maui.0.4.0.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\zxing.net.maui.controls\\0.4.0\\zxing.net.maui.controls.0.4.0.nupkg.sha512",
-    "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.ios.ref.net9.0_26.5\\26.5.9002\\microsoft.ios.ref.net9.0_26.5.26.5.9002.nupkg.sha512",
-    "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.ios.runtime.iossimulator-x64.net9.0_26.5\\26.5.9002\\microsoft.ios.runtime.iossimulator-x64.net9.0_26.5.26.5.9002.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.android.ref.35\\35.0.105\\microsoft.android.ref.35.35.0.105.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.android.runtime.35.android-arm64\\35.0.105\\microsoft.android.runtime.35.android-arm64.35.0.105.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.android.runtime.35.android-x64\\35.0.105\\microsoft.android.runtime.35.android-x64.35.0.105.nupkg.sha512",
+    "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.ios.ref.net9.0_26.5\\26.5.9002\\microsoft.ios.ref.net9.0_26.5.26.5.9002.nupkg.sha512",
+    "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.ios.runtime.iossimulator-x64.net9.0_26.5\\26.5.9002\\microsoft.ios.runtime.iossimulator-x64.net9.0_26.5.26.5.9002.nupkg.sha512",
     "C:\\Users\\NguyenKhoa\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.19041.57\\microsoft.windows.sdk.net.ref.10.0.19041.57.nupkg.sha512"
   ],
   "logs": []

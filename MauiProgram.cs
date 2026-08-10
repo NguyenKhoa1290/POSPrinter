@@ -1,3 +1,4 @@
+using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using POSPrinter.Services;
 using POSPrinter.ViewModels;
@@ -14,6 +15,7 @@ public static class MauiProgram
 
         builder
             .UseMauiApp<App>()
+            .UseMauiCommunityToolkit()   // TouchBehavior — MAUI không có sẵn gesture ấn giữ
 #if IOS || ANDROID
             .UseBarcodeReader()   // ZXing chỉ hỗ trợ iOS/Android, không hỗ trợ Windows
 #endif

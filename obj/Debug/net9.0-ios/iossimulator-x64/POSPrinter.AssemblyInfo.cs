@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("POSPrinter")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+880604b0efd22f3bf68a55a0d2bbc0d5dd0ea3c0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+8d89567cb1f1b3096880b8ba00ea0ff8ef2d5fc7")]
 [assembly: System.Reflection.AssemblyProductAttribute("POSPrinter")]
 [assembly: System.Reflection.AssemblyTitleAttribute("POSPrinter")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

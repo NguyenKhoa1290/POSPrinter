@@ -9,6 +9,7 @@
     ".NETCoreApp,Version=v9.0/win10-x64": {
       "POSPrinter/1.0": {
         "dependencies": {
+          "CommunityToolkit.Maui": "12.3.0",
           "CommunityToolkit.Mvvm": "8.4.0",
           "Microsoft.Extensions.Logging.Debug": "9.0.9",
           "Microsoft.Maui.Controls": "9.0.120",
@@ -30,6 +31,31 @@
           "WinRT.Runtime.dll": {
             "assemblyVersion": "2.2.0.0",
             "fileVersion": "2.2.0.48161"
+          }
+        }
+      },
+      "CommunityToolkit.Maui/12.3.0": {
+        "dependencies": {
+          "CommunityToolkit.Maui.Core": "12.3.0",
+          "Microsoft.Maui.Controls": "9.0.120"
+        },
+        "runtime": {
+          "lib/net9.0-windows10.0.19041/CommunityToolkit.Maui.dll": {
+            "assemblyVersion": "12.3.0.0",
+            "fileVersion": "12.3.0.0"
+          }
+        }
+      },
+      "CommunityToolkit.Maui.Core/12.3.0": {
+        "dependencies": {
+          "Microsoft.Maui.Core": "9.0.120",
+          "Microsoft.Maui.Essentials": "9.0.120",
+          "System.Speech": "9.0.5"
+        },
+        "runtime": {
+          "lib/net9.0-windows10.0.19041/CommunityToolkit.Maui.Core.dll": {
+            "assemblyVersion": "12.3.0.0",
+            "fileVersion": "12.3.0.0"
           }
         }
       },
@@ -562,6 +588,14 @@
           }
         }
       },
+      "System.Speech/9.0.5": {
+        "runtime": {
+          "runtimes/win/lib/net9.0/System.Speech.dll": {
+            "assemblyVersion": "9.0.0.5",
+            "fileVersion": "9.0.525.21509"
+          }
+        }
+      },
       "ZXing.Net/0.16.9": {
         "runtime": {
           "lib/net7.0/zxing.dll": {
@@ -613,6 +647,20 @@
       "type": "runtimepack",
       "serviceable": false,
       "sha512": ""
+    },
+    "CommunityToolkit.Maui/12.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-/hA6qFy/tBTu0d++6tWwOTKDVOBzvzFWcaSS/uX3sWJdibM4SMV8lFhRUexp/1H0PrQXLCqUuJyKxq/TH8L7yw==",
+      "path": "communitytoolkit.maui/12.3.0",
+      "hashPath": "communitytoolkit.maui.12.3.0.nupkg.sha512"
+    },
+    "CommunityToolkit.Maui.Core/12.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+OPqrN1FoJULVXRSjqiYFSJgXtcyzIQRDisAewuFia3KJFCzZK7oFFzDkiefVIy5VDCzYEIhxUz6fLv8ENt/pw==",
+      "path": "communitytoolkit.maui.core/12.3.0",
+      "hashPath": "communitytoolkit.maui.core.12.3.0.nupkg.sha512"
     },
     "CommunityToolkit.Mvvm/8.4.0": {
       "type": "package",
@@ -802,6 +850,13 @@
       "sha512": "sha512-KF4Hn0atdhFA2yXPk2Jzg0jZzDMYdhsbUpwLswAC2Vxai749GHFVdNkWsANxHl6fnJl7JaMm96WtGmFeg+FCFg==",
       "path": "skiasharp.views.winui/3.116.1",
       "hashPath": "skiasharp.views.winui.3.116.1.nupkg.sha512"
+    },
+    "System.Speech/9.0.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-nPZ2rcEVaZlxaLwBamFzz8f5MVM7Y08kzmDbcedXgeSWCGS9NN8mFjSsuTZm3W5pQLI4QhHmcu4h7A0Wf+cD/Q==",
+      "path": "system.speech/9.0.5",
+      "hashPath": "system.speech.9.0.5.nupkg.sha512"
     },
     "ZXing.Net/0.16.9": {
       "type": "package",

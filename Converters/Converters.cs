@@ -35,7 +35,7 @@ public class InverseBoolConverter : IValueConverter
 public class BoolToScanTextConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-        value is true ? "📡 Đang quét..." : "📡 Quét thiết bị Bluetooth";
+        value is true ? "Đang quét..." : "Quét thiết bị Bluetooth";
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         throw new NotImplementedException();

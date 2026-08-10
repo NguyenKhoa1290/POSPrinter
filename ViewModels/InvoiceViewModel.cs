@@ -94,7 +94,7 @@ public partial class InvoiceViewModel : ObservableObject
         }
     }
     public bool IsBtExpanded => !_isBtCollapsed;
-    public string BtArrow    => _isBtCollapsed ? "▶" : "▼";
+    public string BtArrow    => _isBtCollapsed ? "Mở" : "Đóng";
 
     /// <summary>
     /// Thiết bị đã kết nối nhưng chưa đưa được vào CollectionView vì panel đang thu gọn.
@@ -140,7 +140,7 @@ public partial class InvoiceViewModel : ObservableObject
         }
     }
     public bool IsStoreInfoExpanded => !_isStoreInfoCollapsed;
-    public string StoreInfoArrow    => _isStoreInfoCollapsed ? "▶" : "▼";
+    public string StoreInfoArrow    => _isStoreInfoCollapsed ? "Mở" : "Đóng";
 
     [RelayCommand]
     private void ToggleStoreInfoPanel() => IsStoreInfoCollapsed = !IsStoreInfoCollapsed;
@@ -171,7 +171,7 @@ public partial class InvoiceViewModel : ObservableObject
         }
     }
     public bool IsHistoryExpanded => !_isHistoryCollapsed;
-    public string HistoryArrow    => _isHistoryCollapsed ? "▶" : "▼";
+    public string HistoryArrow    => _isHistoryCollapsed ? "Mở" : "Đóng";
 
     [RelayCommand]
     private void ToggleHistoryPanel() => IsHistoryCollapsed = !IsHistoryCollapsed;
@@ -193,7 +193,7 @@ public partial class InvoiceViewModel : ObservableObject
 
                 int pending = records.Count(r => !r.Synced);
                 HistoryStatus = !_historyService.IsCloudEnabled
-                    ? "⚠ Chưa cấu hình Firebase — chỉ lưu trong máy"
+                    ? "Chưa cấu hình Firebase — chỉ lưu trong máy"
                     : pending > 0
                         ? $"{records.Count} hóa đơn · {pending} chờ đồng bộ"
                         : $"{records.Count} hóa đơn · đã đồng bộ";
@@ -202,13 +202,58 @@ public partial class InvoiceViewModel : ObservableObject
         catch (Exception ex)
         {
             await MainThread.InvokeOnMainThreadAsync(() =>
-                HistoryStatus = $"✗ Không tải được lịch sử: {ex.Message}");
+                HistoryStatus = $"Không tải được lịch sử: {ex.Message}");
         }
         finally
         {
             // Phải về main thread: sau await ta đang ở thread nền, mà đây là
             // property có binding — cập nhật off-thread sẽ crash trên iOS
             await MainThread.InvokeOnMainThreadAsync(() => IsHistoryBusy = false);
+        }
+    }
+
+    /// <summary>Bấm vào một hóa đơn → mở/đóng phần chi tiết của chính nó.</summary>
+    [RelayCommand]
+    private void ToggleHistoryDetail(InvoiceRecord? record)
+    {
+        if (record == null) return;
+
+        // Mỗi lúc chỉ mở một hóa đơn cho đỡ rối
+        bool opening = !record.IsExpanded;
+        foreach (var r in InvoiceHistory) r.IsExpanded = false;
+        record.IsExpanded = opening;
+    }
+
+    /// <summary>Ấn giữ một hóa đơn → hỏi rồi xóa ở cả Firebase và trong máy.</summary>
+    [RelayCommand]
+    private async Task DeleteHistoryItemAsync(InvoiceRecord? record)
+    {
+        if (record == null) return;
+
+        var page = Application.Current?.Windows.FirstOrDefault()?.Page;
+        if (page == null) return;
+
+        bool confirmed = await page.DisplayAlert(
+            "Xóa hóa đơn?",
+            $"{record.InvoiceNumber}\n{record.CreatedAtText}\nTổng: {record.TotalText}\n\n"
+            + "Hóa đơn sẽ bị xóa cả trên Firebase và trong máy. Không khôi phục được.",
+            "Xóa", "Hủy");
+
+        if (!confirmed) return;
+
+        IsHistoryBusy = true;
+        var (ok, error) = await _historyService.DeleteAsync(record);
+        IsHistoryBusy = false;
+
+        if (ok)
+        {
+            InvoiceHistory.Remove(record);
+            OnPropertyChanged(nameof(HasHistory));
+            HistoryStatus = $"Đã xóa {record.InvoiceNumber}";
+        }
+        else
+        {
+            HistoryStatus = $"Chưa xóa được: {error}";
         }
     }
 
@@ -245,9 +290,9 @@ public partial class InvoiceViewModel : ObservableObject
             InvoiceHistory.Insert(0, record);
             OnPropertyChanged(nameof(HasHistory));
             HistoryStatus = pushed
-                ? "✓ Đã lưu lên Firebase"
+                ? "Đã lưu lên Firebase"
                 : _historyService.IsCloudEnabled
-                    ? "⏳ Đã lưu trong máy — sẽ đồng bộ khi có mạng"
+                    ? "Đã lưu trong máy — sẽ đồng bộ khi có mạng"
                     : "Đã lưu trong máy (chưa cấu hình Firebase)";
         });
     }
@@ -278,7 +323,7 @@ public partial class InvoiceViewModel : ObservableObject
 
     public List<string> EncodingOptions { get; } =
     [
-        "★ CP1258 + ESC t 33 — EPSON (khuyên dùng)",
+        "CP1258 + ESC t 33 — EPSON (khuyên dùng)",
         "ASCII (bỏ dấu) — mọi máy in",
         "UTF-8 Raw — Xprinter/HPRT mới",
         "CP1258 + ESC t 30 — firmware cũ",
@@ -287,7 +332,7 @@ public partial class InvoiceViewModel : ObservableObject
         "CP1258 không ESC t — máy tự cấu hình",
     ];
 
-    private string _selectedEncodingName = "★ CP1258 + ESC t 33 — EPSON (khuyên dùng)";
+    private string _selectedEncodingName = "CP1258 + ESC t 33 — EPSON (khuyên dùng)";
     public string SelectedEncodingName
     {
         get => _selectedEncodingName;
@@ -325,7 +370,7 @@ public partial class InvoiceViewModel : ObservableObject
     // ─── Computed ─────────────────────────────────────────────────────────────
 
     public bool   IsConnected          => IsDeviceConnected && _printerService?.ConnectedDevice != null;
-    public string ConnectionStatusText => IsConnected ? $"✓ {_printerService?.ConnectedDevice?.Name ?? "Máy in"}" : "Chưa kết nối";
+    public string ConnectionStatusText => IsConnected ? $"{_printerService?.ConnectedDevice?.Name ?? "Máy in"}" : "Chưa kết nối";
     public string ConnectionStatusColor => IsConnected ? "#00E676" : "#FF5252";
 
     public decimal GrandTotal    => ParsePricesSum();
@@ -359,7 +404,7 @@ public partial class InvoiceViewModel : ObservableObject
     private async Task StartScanAsync()
     {
         if (IsScanning) return;
-        if (_printerService == null) { StatusMessage = "⚠ Dịch vụ Bluetooth chưa sẵn sàng"; return; }
+        if (_printerService == null) { StatusMessage = "Dịch vụ Bluetooth chưa sẵn sàng"; return; }
 
         // Nhường sóng: đợi auto-reconnect dừng hẳn rồi mới quét
         await CancelAutoReconnectAsync();
@@ -390,7 +435,7 @@ public partial class InvoiceViewModel : ObservableObject
                 ? $"Tìm thấy {DiscoveredDevices.Count} thiết bị"
                 : _printerService.IsBluetoothEnabled
                     ? "Không tìm thấy thiết bị nào"
-                    : "⚠ Bluetooth chưa bật hoặc chưa được cấp quyền";
+                    : "Bluetooth chưa bật hoặc chưa được cấp quyền";
         }
     }
 
@@ -414,7 +459,7 @@ public partial class InvoiceViewModel : ObservableObject
         StatusMessage = $"Đang kết nối {SelectedDevice.Name}...";
         bool ok = await _printerService.ConnectAsync(SelectedDevice);
         IsDeviceConnected = ok;
-        StatusMessage = ok ? $"✓ Đã kết nối {SelectedDevice.Name}" : "✗ Kết nối thất bại";
+        StatusMessage = ok ? $"Đã kết nối {SelectedDevice.Name}" : "Kết nối thất bại";
 
         if (ok && SelectedDevice != null)
         {
@@ -439,7 +484,7 @@ public partial class InvoiceViewModel : ObservableObject
     [RelayCommand]
     private async Task PrintInvoiceAsync()
     {
-        if (_printerService == null) { StatusMessage = "⚠ Dịch vụ Bluetooth chưa sẵn sàng!"; return; }
+        if (_printerService == null) { StatusMessage = "Dịch vụ Bluetooth chưa sẵn sàng!"; return; }
 
         // Kết nối có thể đã rớt lúc app xuống nền — thử nối lại trước khi bỏ cuộc
         if (!IsConnected)
@@ -449,11 +494,11 @@ public partial class InvoiceViewModel : ObservableObject
             bool reconnected = await EnsureConnectedAsync();
             IsBusy = false;
 
-            if (!reconnected) { StatusMessage = "⚠ Chưa kết nối máy in!"; return; }
+            if (!reconnected) { StatusMessage = "Chưa kết nối máy in!"; return; }
         }
 
         var lines = PreviewLines;
-        if (lines.Count == 0) { StatusMessage = "⚠ Chưa có nội dung để in!"; return; }
+        if (lines.Count == 0) { StatusMessage = "Chưa có nội dung để in!"; return; }
 
         IsBusy = true;
         StatusMessage = "Đang in hóa đơn...";
@@ -472,7 +517,7 @@ public partial class InvoiceViewModel : ObservableObject
                 fontScale     : FontScale);
 
             bool ok = await _printerService.PrintAsync(data);
-            StatusMessage = ok ? "✓ In thành công!" : "✗ Lỗi khi gửi đến máy in — bấm In lần nữa để thử lại";
+            StatusMessage = ok ? "In thành công!" : "Lỗi khi gửi đến máy in — bấm In lần nữa để thử lại";
 
             if (!ok)
             {
@@ -504,7 +549,7 @@ public partial class InvoiceViewModel : ObservableObject
                 }
             }
         }
-        catch (Exception ex) { StatusMessage = $"✗ {ex.Message}"; }
+        catch (Exception ex) { StatusMessage = $"{ex.Message}"; }
         finally { IsBusy = false; }
     }
 
@@ -651,7 +696,7 @@ public partial class InvoiceViewModel : ObservableObject
                 {
                     IsDeviceConnected = ok;
                     StatusMessage = ok
-                        ? $"✓ Tự động kết nối {lastName}"
+                        ? $"Tự động kết nối {lastName}"
                         : "Không thể kết nối lại — thử thủ công";
 
                     if (ok) ShowDeviceInList(device);

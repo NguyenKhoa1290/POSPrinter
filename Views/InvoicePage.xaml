@@ -6,6 +6,8 @@
     xmlns:vm="clr-namespace:POSPrinter.ViewModels"
     xmlns:model="clr-namespace:POSPrinter.Models"
     xmlns:converters="clr-namespace:POSPrinter.Converters"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    x:Name="PageRoot"
     Title="POS Printer"
     BackgroundColor="#0F0F1A"
     Shell.NavBarIsVisible="False">
@@ -109,7 +111,7 @@
             </Border.Shadow>
             <Grid ColumnDefinitions="*,Auto">
                 <VerticalStackLayout Grid.Column="0" Spacing="2">
-                    <Label Text="🧾 POS PRINTER"
+                    <Label Text="POS PRINTER"
                            TextColor="{StaticResource TextMain}"
                            FontSize="22" FontAttributes="Bold" />
                     <Label Text="Máy in nhiệt Bluetooth 58mm"
@@ -136,7 +138,7 @@
                     <VerticalStackLayout Spacing="10">
 
                         <!-- Header có nút thu gọn -->
-                        <Grid ColumnDefinitions="*,36" ColumnSpacing="8">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                             <Label Grid.Column="0"
                                    Text="BLUETOOTH"
                                    Style="{StaticResource SectionLabel}"
@@ -145,7 +147,7 @@
                                     BackgroundColor="{StaticResource BgInput}"
                                     StrokeThickness="1" Stroke="{StaticResource BorderNorm}"
                                     StrokeShape="RoundRectangle 8"
-                                    HeightRequest="32" WidthRequest="36">
+                                    HeightRequest="32" Padding="12,0">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding ToggleBtPanelCommand}" />
                                 </Border.GestureRecognizers>
@@ -188,17 +190,16 @@
                                 </CollectionView.EmptyView>
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="model:BluetoothDevice">
-                                        <Grid Padding="6,8" ColumnDefinitions="30,*,20">
-                                            <Label Grid.Column="0" Text="🖨" FontSize="16" VerticalOptions="Center" />
-                                            <VerticalStackLayout Grid.Column="1" Margin="8,0" VerticalOptions="Center">
+                                        <Grid Padding="6,8" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
                                                 <Label Text="{Binding Name}"
                                                        TextColor="{StaticResource TextMain}"
                                                        FontSize="13" FontAttributes="Bold" />
                                                 <Label Text="{Binding Address}"
                                                        TextColor="{StaticResource TextSub}" FontSize="10" />
                                             </VerticalStackLayout>
-                                            <Label Grid.Column="2" Text="●"
-                                                   TextColor="{StaticResource Success}" FontSize="12"
+                                            <Label Grid.Column="1" Text="Đã kết nối"
+                                                   TextColor="{StaticResource Success}" FontSize="11"
                                                    VerticalOptions="Center" IsVisible="{Binding IsConnected}" />
                                         </Grid>
                                     </DataTemplate>
@@ -207,11 +208,11 @@
     
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="8"
                                   IsVisible="{Binding SelectedDevice, Converter={StaticResource NullToBool}}">
-                                <Button Grid.Column="0" Text="🔗 Kết nối"
+                                <Button Grid.Column="0" Text="Kết nối"
                                         Command="{Binding ConnectCommand}"
                                         Style="{StaticResource BtnPrimary}"
                                         IsEnabled="{Binding IsConnected, Converter={StaticResource InverseBool}}" />
-                                <Button Grid.Column="1" Text="✕ Ngắt"
+                                <Button Grid.Column="1" Text="Ngắt"
                                         Command="{Binding DisconnectCommand}"
                                         Style="{StaticResource BtnDanger}" HeightRequest="48"
                                         IsEnabled="{Binding IsConnected}" />
@@ -232,7 +233,7 @@
                     <VerticalStackLayout Spacing="10">
 
                         <!-- Header có nút thu gọn -->
-                        <Grid ColumnDefinitions="*,36" ColumnSpacing="8">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                             <Label Grid.Column="0"
                                    Text="THÔNG TIN CỬA HÀNG"
                                    Style="{StaticResource SectionLabel}"
@@ -241,7 +242,7 @@
                                     BackgroundColor="{StaticResource BgInput}"
                                     StrokeThickness="1" Stroke="{StaticResource BorderNorm}"
                                     StrokeShape="RoundRectangle 8"
-                                    HeightRequest="32" WidthRequest="36">
+                                    HeightRequest="32" Padding="12,0">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding ToggleStoreInfoPanelCommand}" />
                                 </Border.GestureRecognizers>
@@ -278,7 +279,7 @@
                                         BackgroundColor="Transparent"
                                         FontSize="13" />
                             </Border>
-                            <Label Text="💡 Nếu chữ in sai, thử đổi encoding rồi in lại"
+                            <Label Text="Nếu chữ in sai, thử đổi encoding rồi in lại"
                                    TextColor="{StaticResource TextSub}" FontSize="10" />
                         </VerticalStackLayout><!-- /IsStoreInfoExpanded -->
 
@@ -297,11 +298,11 @@
                             <Label FontSize="11" TextColor="#7099BB" LineBreakMode="WordWrap">
                                 <Label.FormattedText>
                                     <FormattedString>
-                                        <Span Text="💡 " />
+                                        <Span Text="" />
                                         <Span Text="Trái" FontAttributes="Bold" TextColor="#90C0FF" />
                                         <Span Text=": nhập tên / paste từ Zalo (Enter = xuống dòng).  " />
                                         <Span Text="Phải" FontAttributes="Bold" TextColor="#90C0FF" />
-                                        <Span Text=": nhập giá mỗi dòng (số → cộng tiền, chữ → bỏ qua)." />
+                                        <Span Text=": nhập giá mỗi dòng (số thì cộng tiền, chữ thì bỏ qua)." />
                                     </FormattedString>
                                 </Label.FormattedText>
                             </Label>
@@ -361,7 +362,7 @@
                         </Grid>
 
                         <!-- Ghi chú nhỏ cột phải -->
-                        <Label Text="↑ Dòng có chữ sẽ không được cộng vào tổng"
+                        <Label Text="Dòng có chữ sẽ không được cộng vào tổng"
                                TextColor="{StaticResource TextSub}"
                                FontSize="10"
                                HorizontalOptions="End" />
@@ -434,7 +435,7 @@
                                    VerticalOptions="Center"
                                    HorizontalOptions="Center" />
                         </Grid>
-                        <Label Text="💡 Điều chỉnh cỡ chữ phù hợp với máy in của bạn"
+                        <Label Text="Điều chỉnh cỡ chữ phù hợp với máy in của bạn"
                                TextColor="{StaticResource TextSub}" FontSize="10" />
                     </VerticalStackLayout>
                 </Border>
@@ -499,7 +500,7 @@
                     <VerticalStackLayout Spacing="10">
 
                         <!-- Header có nút thu gọn -->
-                        <Grid ColumnDefinitions="*,36,36" ColumnSpacing="8">
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                             <Label Grid.Column="0"
                                    Text="LỊCH SỬ HÓA ĐƠN"
                                    Style="{StaticResource SectionLabel}"
@@ -509,11 +510,11 @@
                                     BackgroundColor="{StaticResource BgInput}"
                                     StrokeThickness="1" Stroke="{StaticResource BorderNorm}"
                                     StrokeShape="RoundRectangle 8"
-                                    HeightRequest="32" WidthRequest="36">
+                                    HeightRequest="32" Padding="12,0">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding LoadHistoryCommand}" />
                                 </Border.GestureRecognizers>
-                                <Label Text="⟳"
+                                <Label Text="Làm mới"
                                        TextColor="{StaticResource Accent}"
                                        FontSize="14" FontAttributes="Bold"
                                        HorizontalOptions="Center" VerticalOptions="Center" />
@@ -523,7 +524,7 @@
                                     BackgroundColor="{StaticResource BgInput}"
                                     StrokeThickness="1" Stroke="{StaticResource BorderNorm}"
                                     StrokeShape="RoundRectangle 8"
-                                    HeightRequest="32" WidthRequest="36">
+                                    HeightRequest="32" Padding="12,0">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding ToggleHistoryPanelCommand}" />
                                 </Border.GestureRecognizers>
@@ -556,6 +557,21 @@
                                         <Border BackgroundColor="{StaticResource BgInputAlt}"
                                                 StrokeThickness="1" Stroke="{StaticResource BorderNorm}"
                                                 StrokeShape="RoundRectangle 10" Padding="12,10">
+
+                                            <!-- Bấm = xem chi tiết, ấn giữ = xóa -->
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.ToggleHistoryDetailCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+
+                                            <Border.Behaviors>
+                                                <toolkit:TouchBehavior
+                                                    LongPressDuration="600"
+                                                    LongPressCommand="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteHistoryItemCommand}"
+                                                    LongPressCommandParameter="{Binding .}" />
+                                            </Border.Behaviors>
+
                                             <VerticalStackLayout Spacing="3">
 
                                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
@@ -572,15 +588,15 @@
 
                                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
                                                     <Label Grid.Column="0"
-                                                           Text="{Binding SyncIcon}"
+                                                           Text="{Binding SyncShort}"
                                                            TextColor="{Binding SyncColor, Converter={StaticResource StringToColor}}"
-                                                           FontSize="11" VerticalOptions="Center" />
+                                                           FontSize="10" VerticalOptions="Center" />
                                                     <Label Grid.Column="1"
                                                            Text="{Binding CreatedAtText}"
                                                            TextColor="{StaticResource TextSub}"
                                                            FontSize="11" VerticalOptions="Center" />
                                                     <Label Grid.Column="2"
-                                                           Text="{Binding Cashier}"
+                                                           Text="{Binding CashierText}"
                                                            TextColor="{StaticResource TextSub}"
                                                            FontSize="11" VerticalOptions="Center"
                                                            LineBreakMode="TailTruncation" />
@@ -588,7 +604,77 @@
 
                                                 <Label Text="{Binding ItemCountText}"
                                                        TextColor="{StaticResource TextSub}"
-                                                       FontSize="10" LineBreakMode="TailTruncation" />
+                                                       FontSize="10" LineBreakMode="TailTruncation"
+                                                       IsVisible="{Binding IsExpanded, Converter={StaticResource InverseBool}}" />
+
+                                                <!-- ─── CHI TIẾT (bấm để mở) ─────────────────── -->
+                                                <VerticalStackLayout IsVisible="{Binding IsExpanded}"
+                                                                     Spacing="6" Margin="0,6,0,0">
+
+                                                    <BoxView HeightRequest="1"
+                                                             Color="{StaticResource BorderNorm}" />
+
+                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                                        <Label Grid.Column="0" Text="Cửa hàng"
+                                                               TextColor="{StaticResource TextSub}" FontSize="10" />
+                                                        <Label Grid.Column="1" Text="{Binding StoreName}"
+                                                               TextColor="{StaticResource TextMain}" FontSize="10"
+                                                               HorizontalTextAlignment="End" />
+                                                    </Grid>
+                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                                        <Label Grid.Column="0" Text="Thu ngân"
+                                                               TextColor="{StaticResource TextSub}" FontSize="10" />
+                                                        <Label Grid.Column="1" Text="{Binding CashierText}"
+                                                               TextColor="{StaticResource TextMain}" FontSize="10"
+                                                               HorizontalTextAlignment="End" />
+                                                    </Grid>
+
+                                                    <BoxView HeightRequest="1"
+                                                             Color="{StaticResource BorderNorm}" />
+
+                                                    <!-- Các dòng hàng -->
+                                                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Lines}"
+                                                                         Spacing="2">
+                                                        <BindableLayout.ItemTemplate>
+                                                            <DataTemplate x:DataType="model:InvoiceLine">
+                                                                <Grid ColumnDefinitions="*,90" ColumnSpacing="8">
+                                                                    <Label Grid.Column="0" Text="{Binding Name}"
+                                                                           TextColor="{StaticResource TextMain}"
+                                                                           FontSize="11" LineBreakMode="WordWrap" />
+                                                                    <Label Grid.Column="1" Text="{Binding Price}"
+                                                                           TextColor="{StaticResource TextMain}"
+                                                                           FontSize="11"
+                                                                           HorizontalTextAlignment="End" />
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </BindableLayout.ItemTemplate>
+                                                    </VerticalStackLayout>
+
+                                                    <BoxView HeightRequest="1"
+                                                             Color="{StaticResource BorderNorm}" />
+
+                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                                        <Label Grid.Column="0" Text="TỔNG CỘNG"
+                                                               TextColor="{StaticResource TextMain}"
+                                                               FontSize="12" FontAttributes="Bold" />
+                                                        <Label Grid.Column="1" Text="{Binding TotalText}"
+                                                               TextColor="{StaticResource Accent}"
+                                                               FontSize="12" FontAttributes="Bold"
+                                                               HorizontalTextAlignment="End" />
+                                                    </Grid>
+
+                                                    <Label Text="{Binding NoteText}"
+                                                           TextColor="{StaticResource TextSub}"
+                                                           FontSize="10" LineBreakMode="WordWrap" />
+
+                                                    <Label Text="{Binding SyncText}"
+                                                           TextColor="{Binding SyncColor, Converter={StaticResource StringToColor}}"
+                                                           FontSize="10" />
+
+                                                    <Label Text="Ấn giữ vào hóa đơn để xóa"
+                                                           TextColor="{StaticResource TextSub}"
+                                                           FontSize="9" FontAttributes="Italic" />
+                                                </VerticalStackLayout>
                                             </VerticalStackLayout>
                                         </Border>
                                     </DataTemplate>
@@ -602,7 +688,7 @@
                                        FontSize="12" HorizontalTextAlignment="Center" />
                             </Border>
 
-                            <Button Text="🗑  Xóa lịch sử trong máy"
+                            <Button Text="Xóa lịch sử trong máy"
                                     Command="{Binding ClearHistoryCommand}"
                                     Style="{StaticResource BtnOutline}"
                                     IsVisible="{Binding HasHistory}" />
@@ -625,7 +711,7 @@
                 <ActivityIndicator Grid.Column="0"
                                    IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}"
                                    Color="{StaticResource Accent}" WidthRequest="36" HeightRequest="36" />
-                <Button Grid.Column="1" Text="🖨  IN HÓA ĐƠN"
+                <Button Grid.Column="1" Text="IN HÓA ĐƠN"
                         Command="{Binding PrintInvoiceCommand}"
                         IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}"
                         BackgroundColor="{StaticResource Primary}"

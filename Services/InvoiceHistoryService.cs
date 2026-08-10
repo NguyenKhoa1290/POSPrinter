@@ -221,6 +221,39 @@ public class InvoiceHistoryService
             .Take(FirebaseConfig.HistoryLimit)];
     }
 
+    /// <summary>
+    /// Xóa một hóa đơn ở CẢ hai nơi: Firebase và bộ nhớ máy.
+    ///
+    /// Nếu có cấu hình cloud mà xóa trên Firebase thất bại (mất mạng, rules chặn)
+    /// thì KHÔNG xóa bản cục bộ — xóa mỗi bản trong máy sẽ khiến hóa đơn sống lại
+    /// ở lần tải danh sách kế tiếp, trông như xóa không ăn.
+    /// </summary>
+    /// <returns>(thành công, thông báo lỗi nếu có)</returns>
+    public async Task<(bool Ok, string? Error)> DeleteAsync(InvoiceRecord record)
+    {
+        if (IsCloudEnabled)
+        {
+            try
+            {
+                string url = FirebaseConfig.BuildUrl($"{FirebaseConfig.InvoicesPath}/{record.Id}");
+                using var response = await _http.DeleteAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                    return (false, $"Firebase từ chối xóa ({(int)response.StatusCode})");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Không kết nối được Firebase: {ex.Message}");
+            }
+        }
+
+        var all = await LoadLocalAsync();
+        all.RemoveAll(r => r.Id == record.Id);
+        await SaveLocalAsync(all);
+
+        return (true, null);
+    }
+
     /// <summary>Xóa lịch sử trong máy. Không đụng tới dữ liệu trên Firebase.</summary>
     public async Task ClearLocalAsync()
     {
